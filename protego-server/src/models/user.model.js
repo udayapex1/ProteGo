@@ -56,6 +56,16 @@ const userSchema = new mongoose.Schema({
   isTwoFactorEnabled: {
     type: Boolean,
     default: false
+  },
+  biometricEnabled: {
+    type: Boolean,
+    default: false,
+    validate: {
+      validator(enabled) {
+        return this.role === 'parent' || !enabled;
+      },
+      message: 'Biometric login is only available for parent users'
+    }
   }
 }, { timestamps: true });
 
