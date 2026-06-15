@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import userRepository from "../repositories/user.repository.js";
 import {
   generateRefreshToken,
@@ -23,7 +24,7 @@ const authService = {
       role,
     });
 
-    const accessToken = generateAccessToken(user._id, user._role);
+    const accessToken = generateAccessToken(user._id, user.role);
     const refreshToken = generateRefreshToken(user._id);
 
     await userRepository.updateById(user._id, { refreshToken });
@@ -102,6 +103,63 @@ const authService = {
     if (!isValid) throw new Error('Invalid 2FA code');
 
     await userRepository.updateById(userId, { isTwoFactorEnabled: true });
+  },
+
+  forgotPassword: async (email) => {
+    if (!email) throw new Error('Email is required');
+
+    const user = await userRepository.findByEmail(email);
+    if (!user) return;
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+    user.resetPasswordExpiry = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const resetUrl = `${clientUrl.replace(/\/$/, '')}/reset-password/${resetToken}`;
+
+    try {
+      await sendMail({
+        to: user.email,
+        subject: 'Reset your Protego password',
+        html: `
+          <h2>Password reset request</h2>
+          <p>Click the link below to reset your password. This link expires in 15 minutes.</p>
+          <p><a href="${resetUrl}">Reset password</a></p>
+          <p>If you did not request this, you can ignore this email.</p>
+        `
+      });
+    } catch (error) {
+      user.resetPasswordToken = null;
+      user.resetPasswordExpiry = null;
+      await user.save();
+      throw new Error('Unable to send password reset email');
+    }
+  },
+
+  resetPassword: async ({ token, password }) => {
+    if (!token) throw new Error('Reset token is required');
+    if (typeof password !== 'string' || password.length < 8) {
+      throw new Error('Password must be at least 8 characters');
+    }
+
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+    const user = await userRepository.findByValidResetToken(resetPasswordToken);
+
+    if (!user) throw new Error('Reset token is invalid or has expired');
+
+    user.password = password;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpiry = null;
+    user.refreshToken = null;
+    await user.save();
   }
 
 };

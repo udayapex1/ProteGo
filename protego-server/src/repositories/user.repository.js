@@ -7,11 +7,18 @@ const userRepository = {
   },
 
   findByEmail: async (email) => {
-    return await User.findOne({ email });
+    return await User.findOne({ email: email.trim().toLowerCase() });
   },
 
   findById: async (id) => {
     return await User.findById(id);
+  },
+
+  findByValidResetToken: async (resetPasswordToken) => {
+    return await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpiry: { $gt: new Date() }
+    });
   },
 
   updateById: async (id, data) => {
