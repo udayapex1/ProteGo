@@ -1,12 +1,39 @@
-import Location from '../models/location.model.js';
+import Location from "../models/location.model.js";
+import redisClient from "../config/redis.js";
 const locationRepository = {
   save: async (data) => {
     const location = new Location(data);
     return await location.save();
   },
+  save: async (data) => {
+    const location = new Location(data);
+    const saved = await location.save();
+
+    // Redis mein cache — 5 min TTL
+    await redisClient.setEx(
+      `location:${data.userId}`,
+      300,
+      JSON.stringify({
+        latitude: data.location.coordinates[1],
+        longitude: data.location.coordinates[0],
+        battery: data.battery,
+        network: data.network,
+        isSOS: data.isSOS,
+        timestamp: data.createdAt,
+      }),
+    );
+
+    return saved;
+  },
 
   saveBatch: async (locations) => {
     return await Location.insertMany(locations);
+  },
+  getLatest: async (userId) => {
+    const cached = await redisClient.get(`location:${userId}`);
+    if (cached) return JSON.parse(cached);
+
+    return await Location.findOne({ userId }).sort({ createdAt: -1 }).lean();
   },
 
   getLatest: async (userId) => {
