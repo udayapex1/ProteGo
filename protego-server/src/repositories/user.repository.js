@@ -24,6 +24,9 @@ const userRepository = {
   updateById: async (id, data) => {
     return await User.findByIdAndUpdate(id, data, { new: true });
   },
+  deleteById: async (id) => {
+  return await User.findByIdAndDelete(id);
+},
 
   findByPairingCode: async (code) => {
     return await User.findOne({ 
