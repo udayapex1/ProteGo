@@ -10,7 +10,8 @@ export interface User {
   createdAt: string;
 }
 
-export interface AuthResponse {
+export interface AuthSessionResponse {
+  requiresTwoFactor?: false;
   accessToken: string;
   refreshToken: string;
   user: {
@@ -19,6 +20,14 @@ export interface AuthResponse {
     role: UserRole;
   };
 }
+
+export interface TwoFactorRequiredResponse {
+  requiresTwoFactor: true;
+  userId: string;
+}
+
+export type LoginResponse = AuthSessionResponse | TwoFactorRequiredResponse;
+export type AuthResponse = AuthSessionResponse;
 
 export interface LoginPayload {
   email: string;
