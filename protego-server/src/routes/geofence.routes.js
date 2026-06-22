@@ -9,5 +9,6 @@ router.get('/parent', authMiddleware, geofenceController.getParentZones);
 router.get('/child', authMiddleware, geofenceController.getChildZones);
 router.delete('/:id', authMiddleware, geofenceController.deactivate);
 router.post('/breach', authMiddleware, geofenceController.handleBreach);
+router.put('/:id', authMiddleware, geofenceController.update);
 
 export default router;

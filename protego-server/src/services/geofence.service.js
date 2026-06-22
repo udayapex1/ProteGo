@@ -80,7 +80,16 @@ const io = getIO();
     }).catch(err => console.error("⚠️ Background Parent Lookup Failure during Breach event:", err));
 
     return { message: 'Breach alert metrics routed successfully.' };
+  },
+  update: async (geofenceId, parentId, data) => {
+  if (!data.name || !data.latitude || !data.longitude || !data.radius) {
+    throw new Error('Validation Failed: Missing required parameters for zone update.');
   }
+  
+  const result = await geofenceRepository.update(geofenceId, parentId, data);
+  if (!result) throw new Error('Zone not found or unauthorized update request.');
+  return result;
+},
 
 };
 

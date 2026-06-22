@@ -29,11 +29,11 @@ const authService = {
 
     await userRepository.updateById(user._id, { refreshToken });
 
-    return {
-      accessToken,
-      refreshToken,
-      user: { id: user._id, name: user.name, role: user.role },
-    };
+   return { 
+  accessToken, 
+  refreshToken, 
+  user: { id: user._id, name: user.name, role: user.role, pairedWith: user.pairedWith } 
+};
   },
 
   login: async ({ email, password }) => {
@@ -52,11 +52,11 @@ const authService = {
 
     await userRepository.updateById(user._id, { refreshToken });
 
-    return {
-      accessToken,
-      refreshToken,
-      user: { id: user._id, name: user.name, role: user.role },
-    };
+   return { 
+  accessToken, 
+  refreshToken, 
+  user: { id: user._id, name: user.name, role: user.role, pairedWith: user.pairedWith } 
+};
   },
   validateTwoFactor: async ({ userId, token }) => {
     const user = await userRepository.findById(userId);
@@ -70,11 +70,11 @@ const authService = {
 
     await userRepository.updateById(user._id, { refreshToken });
 
-    return {
-      accessToken,
-      refreshToken,
-      user: { id: user._id, name: user.name, role: user.role },
-    };
+   return { 
+  accessToken, 
+  refreshToken, 
+  user: { id: user._id, name: user.name, role: user.role, pairedWith: user.pairedWith } 
+};
   },
 
   refresh: async (token) => {

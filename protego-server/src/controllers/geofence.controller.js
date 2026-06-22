@@ -50,7 +50,16 @@ const geofenceController = {
       console.error('❌ Error in handleBreach:', error.message);
       return res.status(500).json({ message: error.message });
     }
+  },
+  update: async (req, res) => {
+  try {
+    const result = await geofenceService.update(req.params.id, req.user.userId, req.body);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('❌ Error in update geofence:', error.message);
+    return res.status(400).json({ message: error.message });
   }
+},
 
 };
 

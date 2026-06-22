@@ -29,7 +29,18 @@ const geofenceRepository = {
       { isActive: false },
       { returnDocument: 'after' }
     );
-  }
+  },
+  update: async (id, parentId, data) => {
+  return await Geofence.findOneAndUpdate(
+    { _id: id, parentId },
+    { 
+      name: data.name,
+      center: { type: 'Point', coordinates: [data.longitude, data.latitude] },
+      radius: data.radius,
+    },
+    { new: true }
+  );
+},
 
 };
 
