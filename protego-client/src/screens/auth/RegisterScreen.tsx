@@ -20,6 +20,7 @@ import { colors, spacing, radius, fontSize } from "../../constants/theme";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 import { UserRole } from "../../types/user.types";
+import { useAppTheme } from "../../context/ThemeContext";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -66,6 +67,7 @@ function RoleCard({
   selected: boolean;
   onPress: () => void;
 }) {
+  const { theme } = useAppTheme();
   const cardScale  = useRef(new Animated.Value(1)).current;
   const charFloat  = useRef(new Animated.Value(0)).current;
   const charOpacity = useRef(new Animated.Value(selected ? 1 : 0.45)).current;
@@ -124,7 +126,12 @@ function RoleCard({
     <Animated.View
       style={[
         styles.roleCard,
+        {
+          backgroundColor: theme.colors.row,
+          borderColor: theme.colors.border,
+        },
         selected && styles.roleCardSelected,
+        selected && { backgroundColor: theme.colors.inputFocused },
         { transform: [{ scale: cardScale }] },
       ]}
     >
@@ -150,7 +157,13 @@ function RoleCard({
 
         {/* Info */}
         <View style={styles.roleInfoRow}>
-          <Text style={[styles.roleName, selected && styles.roleNameSelected]}>
+          <Text
+            style={[
+              styles.roleName,
+              { color: selected ? ACCENT : theme.colors.textMuted },
+              selected && styles.roleNameSelected,
+            ]}
+          >
             {item.label}
           </Text>
           <Text style={[styles.roleSub, selected && styles.roleSubSelected]}>
@@ -170,6 +183,7 @@ function RoleCard({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function RegisterScreen({ navigation }: Props) {
   const { register } = useAuth();
+  const { theme } = useAppTheme();
   const [name,     setName]     = useState("");
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
@@ -290,7 +304,7 @@ export default function RegisterScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <Animated.View
@@ -308,7 +322,7 @@ export default function RegisterScreen({ navigation }: Props) {
         >
           {/* ── Header ── */}
           <LinearGradient
-            colors={["#000000", "#0a0a0a", "#0f0f0f"]}
+            colors={theme.colors.header}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.headerGrad}
@@ -325,29 +339,34 @@ export default function RegisterScreen({ navigation }: Props) {
               <View style={styles.logoIcon}>
                 <Text style={{ fontSize: 18 }}>🛡️</Text>
               </View>
-              <Text style={styles.logoText}>
+              <Text style={[styles.logoText, { color: theme.colors.text }]}>
                 Protego<Text style={{ color: ACCENT }}>.</Text>
               </Text>
             </View>
 
-            <Text style={styles.eyebrow}>Get started</Text>
-            <Text style={styles.headerTitle}>
+            <Text style={[styles.eyebrow, { color: theme.colors.textSubtle }]}>Get started</Text>
+            <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
               Create your account{"\n"}and stay protected.
             </Text>
           </LinearGradient>
 
           {/* ── Form card ── */}
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
 
             {/* Field 0 — Name */}
             <Animated.View style={fieldAnim(0)}>
-              <Text style={styles.inputLabel}>Full name</Text>
-              <View style={[styles.inputPill, focused === "name" && styles.inputPillFocused]}>
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Full name</Text>
+              <View style={[
+                styles.inputPill,
+                { backgroundColor: theme.colors.input, borderColor: theme.colors.border },
+                focused === "name" && styles.inputPillFocused,
+                focused === "name" && { backgroundColor: theme.colors.inputFocused },
+              ]}>
                 <Ionicons name="person-outline" size={16} color={iconColor("name")} />
                 <TextInput
-                  style={styles.inputField}
+                  style={[styles.inputField, { color: theme.colors.text }]}
                   placeholder="Your full name"
-                  placeholderTextColor="#bbb"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={name}
                   onChangeText={setName}
                   onFocus={() => setFocused("name")}
@@ -358,13 +377,18 @@ export default function RegisterScreen({ navigation }: Props) {
 
             {/* Field 1 — Email */}
             <Animated.View style={fieldAnim(1)}>
-              <Text style={styles.inputLabel}>Email address</Text>
-              <View style={[styles.inputPill, focused === "email" && styles.inputPillFocused]}>
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Email address</Text>
+              <View style={[
+                styles.inputPill,
+                { backgroundColor: theme.colors.input, borderColor: theme.colors.border },
+                focused === "email" && styles.inputPillFocused,
+                focused === "email" && { backgroundColor: theme.colors.inputFocused },
+              ]}>
                 <Ionicons name="mail-outline" size={16} color={iconColor("email")} />
                 <TextInput
-                  style={styles.inputField}
+                  style={[styles.inputField, { color: theme.colors.text }]}
                   placeholder="your@email.com"
-                  placeholderTextColor="#bbb"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={email}
                   onChangeText={setEmail}
                   onFocus={() => setFocused("email")}
@@ -377,13 +401,18 @@ export default function RegisterScreen({ navigation }: Props) {
 
             {/* Field 2 — Password */}
             <Animated.View style={fieldAnim(2)}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <View style={[styles.inputPill, focused === "password" && styles.inputPillFocused]}>
+              <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Password</Text>
+              <View style={[
+                styles.inputPill,
+                { backgroundColor: theme.colors.input, borderColor: theme.colors.border },
+                focused === "password" && styles.inputPillFocused,
+                focused === "password" && { backgroundColor: theme.colors.inputFocused },
+              ]}>
                 <Ionicons name="lock-closed-outline" size={16} color={iconColor("password")} />
                 <TextInput
-                  style={styles.inputField}
+                  style={[styles.inputField, { color: theme.colors.text }]}
                   placeholder="••••••••"
-                  placeholderTextColor="#bbb"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={password}
                   onChangeText={setPassword}
                   onFocus={() => setFocused("password")}
@@ -407,7 +436,7 @@ export default function RegisterScreen({ navigation }: Props) {
             <Animated.View style={fieldAnim(3)}>
               <View style={styles.divider}>
                 <View style={styles.divLine} />
-                <Text style={styles.divText}>I am a</Text>
+                <Text style={[styles.divText, { color: theme.colors.textSubtle }]}>I am a</Text>
                 <View style={styles.divLine} />
               </View>
 
@@ -443,9 +472,9 @@ export default function RegisterScreen({ navigation }: Props) {
 
             {/* Footer */}
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={styles.footerText}>
+              <Text style={[styles.footerText, { color: theme.colors.textMuted }]}>
                 Already have an account?{" "}
-                <Text style={styles.footerLink}>Log in</Text>
+                <Text style={[styles.footerLink, { color: theme.colors.accent }]}>Log in</Text>
               </Text>
             </TouchableOpacity>
 

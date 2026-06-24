@@ -17,6 +17,7 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
+import { useAppTheme } from '../../context/ThemeContext';
 
 type Props = {
   navigation: StackNavigationProp<AuthStackParamList, 'Login'>;
@@ -28,6 +29,7 @@ const ACCENT_BORDER = 'rgba(124,58,237,0.2)';
 
 export default function LoginScreen({ navigation }: Props) {
   const { login } = useAuth();
+  const { theme } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,14 +56,14 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
 
         {/* ── Header gradient ── */}
         <LinearGradient
-          colors={['#000000', '#0a0a0a', '#0f0f0f']}
+          colors={theme.colors.header}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.headerGrad}
@@ -71,26 +73,34 @@ export default function LoginScreen({ navigation }: Props) {
             <View style={styles.logoIcon}>
               <Text style={{ fontSize: 18 }}>🛡️</Text>
             </View>
-            <Text style={styles.logoText}>
+            <Text style={[styles.logoText, { color: theme.colors.text }]}>
               Protego<Text style={{ color: ACCENT }}>.</Text>
             </Text>
           </View>
 
           {/* Eyebrow + headline */}
-          <Text style={styles.eyebrow}>Welcome back</Text>
-          <Text style={styles.headerTitle}>
+          <Text style={[styles.eyebrow, { color: theme.colors.textSubtle }]}>Welcome back</Text>
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
             Keep your family{'\n'}safe & connected.
           </Text>
         </LinearGradient>
 
         {/* ── Form card ── */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
 
           {/* Email */}
-          <Text style={styles.inputLabel}>Email address</Text>
+          <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Email address</Text>
           <View style={[
             styles.inputPill,
+            {
+              backgroundColor: theme.colors.input,
+              borderColor: theme.colors.border,
+            },
             focusedField === 'email' && styles.inputPillFocused,
+            focusedField === 'email' && {
+              backgroundColor: theme.colors.inputFocused,
+              borderColor: ACCENT_BORDER,
+            },
           ]}>
             <Ionicons
               name="mail-outline"
@@ -98,9 +108,9 @@ export default function LoginScreen({ navigation }: Props) {
               color={focusedField === 'email' ? ACCENT : '#aaa'}
             />
             <TextInput
-              style={styles.inputField}
+              style={[styles.inputField, { color: theme.colors.text }]}
               placeholder="your@email.com"
-              placeholderTextColor="#bbb"
+              placeholderTextColor={theme.colors.textMuted}
               value={email}
               onChangeText={setEmail}
               onFocus={() => setFocusedField('email')}
@@ -111,10 +121,18 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
 
           {/* Password */}
-          <Text style={styles.inputLabel}>Password</Text>
+          <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Password</Text>
           <View style={[
             styles.inputPill,
+            {
+              backgroundColor: theme.colors.input,
+              borderColor: theme.colors.border,
+            },
             focusedField === 'password' && styles.inputPillFocused,
+            focusedField === 'password' && {
+              backgroundColor: theme.colors.inputFocused,
+              borderColor: ACCENT_BORDER,
+            },
           ]}>
             <Ionicons
               name="lock-closed-outline"
@@ -122,9 +140,9 @@ export default function LoginScreen({ navigation }: Props) {
               color={focusedField === 'password' ? ACCENT : '#aaa'}
             />
             <TextInput
-              style={styles.inputField}
+              style={[styles.inputField, { color: theme.colors.text }]}
               placeholder="••••••••"
-              placeholderTextColor="#bbb"
+              placeholderTextColor={theme.colors.textMuted}
               value={password}
               onChangeText={setPassword}
               onFocus={() => setFocusedField('password')}
@@ -142,7 +160,7 @@ export default function LoginScreen({ navigation }: Props) {
 
           {/* Forgot */}
           <TouchableOpacity onPress={() => {}} style={styles.forgotWrapper}>
-            <Text style={styles.forgotText}>Forgot password?</Text>
+            <Text style={[styles.forgotText, { color: theme.colors.accent }]}>Forgot password?</Text>
           </TouchableOpacity>
 
           {/* Primary CTA */}
@@ -158,29 +176,41 @@ export default function LoginScreen({ navigation }: Props) {
           {/* Divider */}
           <View style={styles.orRow}>
             <View style={styles.orLine} />
-            <Text style={styles.orText}>or continue with</Text>
+            <Text style={[styles.orText, { color: theme.colors.textSubtle }]}>or continue with</Text>
             <View style={styles.orLine} />
           </View>
 
           {/* Social buttons */}
           <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={[
+                styles.socialBtn,
+                { backgroundColor: theme.colors.row, borderColor: theme.colors.border },
+              ]}
+              activeOpacity={0.7}
+            >
               {/* Google "G" rendered with colored spans */}
               <Text style={styles.googleG}>G</Text>
-              <Text style={styles.socialText}>Google</Text>
+              <Text style={[styles.socialText, { color: theme.colors.text }]}>Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.7}>
-              <Ionicons name="finger-print-outline" size={17} color="#555" />
-              <Text style={styles.socialText}>Biometric</Text>
+            <TouchableOpacity
+              style={[
+                styles.socialBtn,
+                { backgroundColor: theme.colors.row, borderColor: theme.colors.border },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="finger-print-outline" size={17} color={theme.colors.textMuted} />
+              <Text style={[styles.socialText, { color: theme.colors.text }]}>Biometric</Text>
             </TouchableOpacity>
           </View>
 
           {/* Footer */}
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.footerText}>
+            <Text style={[styles.footerText, { color: theme.colors.textMuted }]}>
               Don't have an account?{' '}
-              <Text style={styles.footerLink}>Sign up</Text>
+              <Text style={[styles.footerLink, { color: theme.colors.accent }]}>Sign up</Text>
             </Text>
           </TouchableOpacity>
 

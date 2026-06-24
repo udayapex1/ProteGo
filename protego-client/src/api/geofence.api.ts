@@ -13,6 +13,10 @@ export const geofenceApi = {
     const { data } = await apiClient.post('/geofence/create', payload);
     return data;
   },
+  update: async (id: string, payload: { name: string; latitude: number; longitude: number; radius: number }) => {
+    const { data } = await apiClient.put(`/geofence/${id}`, payload);
+    return data;
+  },
 
   getParentZones: async (): Promise<Geofence[]> => {
     const { data } = await apiClient.get('/geofence/parent');

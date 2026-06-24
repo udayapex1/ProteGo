@@ -1,12 +1,17 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, spacing } from '../../constants/theme';
+import { useAppTheme } from '../../context/ThemeContext';
 
 export default function PairingScreen() {
+  const { theme } = useAppTheme();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Pairing</Text>
-      <Text style={styles.subtitle}>Family pairing setup will appear here.</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.title, { color: theme.colors.text }]}>Pairing</Text>
+      <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
+        Family pairing setup will appear here.
+      </Text>
     </View>
   );
 }

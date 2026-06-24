@@ -6,7 +6,9 @@ import { LoginPayload, RegisterPayload, UserRole } from '../types/user.types';
 interface AuthUser {
   id: string;
   name: string;
+  email?: string;
   role: UserRole;
+  pairedWith?: string | null;
 }
 
 interface AuthContextType {
@@ -54,10 +56,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const result = await authApi.login(payload);
 
     if (result.requiresTwoFactor) {
+      console.log('Login requires two-factor:', {
+        userId: result.userId,
+      });
       return { requiresTwoFactor: true, userId: result.userId };
     }
 
     await persistSession(result.accessToken, result.refreshToken, result.user);
+    console.log('Login session persisted:', {
+      userId: result.user.id,
+      role: result.user.role,
+    });
     return {};
   };
 
@@ -69,6 +78,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (payload: RegisterPayload) => {
     const result = await authApi.register(payload);
     await persistSession(result.accessToken, result.refreshToken, result.user);
+    console.log('Register session persisted:', {
+      userId: result.user.id,
+      role: result.user.role,
+    });
   };
 
   const logout = async () => {

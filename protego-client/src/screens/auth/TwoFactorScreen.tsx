@@ -4,11 +4,13 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { useAuth } from '../../context/AuthContext';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { colors, fontSize, radius, spacing } from '../../constants/theme';
+import { useAppTheme } from '../../context/ThemeContext';
 
 type Props = StackScreenProps<AuthStackParamList, 'TwoFactor'>;
 
 export default function TwoFactorScreen({ route }: Props) {
   const { completeTwoFactor } = useAuth();
+  const { theme } = useAppTheme();
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,13 +31,22 @@ export default function TwoFactorScreen({ route }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Two-factor verification</Text>
-      <Text style={styles.subtitle}>Enter the code from your authenticator app.</Text>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.title, { color: theme.colors.text }]}>Two-factor verification</Text>
+      <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
+        Enter the code from your authenticator app.
+      </Text>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            backgroundColor: theme.colors.input,
+            borderColor: theme.colors.border,
+            color: theme.colors.text,
+          },
+        ]}
         placeholder="Verification code"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={theme.colors.textMuted}
         value={token}
         onChangeText={setToken}
         keyboardType="number-pad"
