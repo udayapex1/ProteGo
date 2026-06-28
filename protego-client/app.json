@@ -13,7 +13,16 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Protego to access your location even when the app is closed, so your family can stay connected.",
+        "NSLocationWhenInUseUsageDescription": "Allow Protego to access your location to share it with your family.",
+        "UIBackgroundModes": [
+          "location",
+          "location"
+        ]
+      },
+      "bundleIdentifier": "com.udaypareta.protegoclient"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +33,13 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.USE_BIOMETRIC",
-        "android.permission.USE_FINGERPRINT"
+        "android.permission.USE_FINGERPRINT",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.udaypareta.protegoclient"
     },
@@ -37,7 +52,14 @@
         {
           "faceIDPermission": "Allow Protego to use Face ID for authentication."
         }
-      ]
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Protego to access your location even when the app is closed, so your family can stay connected."
+        }
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }

@@ -1,10 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const BASE_URL = 'http://172.30.8.40:8000/api'; // dev mein local IP, baad mein production URL
+import { API_BASE_URL } from '../config/api';
 
 const apiClient = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 
@@ -79,7 +78,7 @@ apiClient.interceptors.response.use(
           hasRefreshToken: Boolean(refreshToken),
         });
 
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
 
         await AsyncStorage.setItem('accessToken', data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
