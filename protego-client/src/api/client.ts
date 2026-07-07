@@ -1,9 +1,10 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '../config/api';
+
+const BASE_URL = 'http://10.13.182.50:8000/api'; 
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BASE_URL,
   timeout: 10000,
 });
 
@@ -78,7 +79,7 @@ apiClient.interceptors.response.use(
           hasRefreshToken: Boolean(refreshToken),
         });
 
-        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
 
         await AsyncStorage.setItem('accessToken', data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
