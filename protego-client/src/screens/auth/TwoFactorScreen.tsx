@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { colors, fontSize, radius, spacing } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
+import ThemeToggle from '../../components/ThemeToggle';
 
 type Props = StackScreenProps<AuthStackParamList, 'TwoFactor'>;
 
@@ -32,6 +33,9 @@ export default function TwoFactorScreen({ route }: Props) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={{ position: 'absolute', top: 56, right: 28, zIndex: 10 }}>
+        <ThemeToggle />
+      </View>
       <Text style={[styles.title, { color: theme.colors.text }]}>Two-factor verification</Text>
       <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
         Enter the code from your authenticator app.
@@ -51,8 +55,8 @@ export default function TwoFactorScreen({ route }: Props) {
         onChangeText={setToken}
         keyboardType="number-pad"
       />
-      <TouchableOpacity style={styles.button} onPress={handleVerify} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Verifying...' : 'Verify'}</Text>
+      <TouchableOpacity style={[styles.button, { backgroundColor: theme.colors.primary }]} onPress={handleVerify} disabled={loading}>
+        <Text style={[styles.buttonText, { color: theme.colors.surface }]}>{loading ? 'Verifying...' : 'Verify'}</Text>
       </TouchableOpacity>
     </View>
   );

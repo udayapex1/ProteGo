@@ -18,6 +18,8 @@ import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { useAppTheme } from '../../context/ThemeContext';
+import ThemeToggle from '../../components/ThemeToggle';
+import { Image } from 'expo-image';
 
 type Props = {
   navigation: StackNavigationProp<AuthStackParamList, 'Login'>;
@@ -59,6 +61,9 @@ export default function LoginScreen({ navigation }: Props) {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <View style={{ position: 'absolute', top: 56, right: 28, zIndex: 10 }}>
+        <ThemeToggle />
+      </View>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
 
         {/* ── Header gradient ── */}
@@ -70,9 +75,13 @@ export default function LoginScreen({ navigation }: Props) {
         >
           {/* Logo row */}
           <View style={styles.logoRow}>
-            <View style={styles.logoIcon}>
-              <Text style={{ fontSize: 18 }}>🛡️</Text>
-            </View>
+            {/* <View style={styles.logoIcon}> */}
+            <Image
+              source={{ uri: 'https://res.cloudinary.com/dwemivxbp/image/upload/v1783400959/Protego_logo_uni_l3zaze.png' }}
+              style={{ width: 80, height: 80, borderRadius: 12 }}
+              contentFit="contain"
+            />
+            {/* </View> */}
             <Text style={[styles.logoText, { color: theme.colors.text }]}>
               Protego<Text style={{ color: ACCENT }}>.</Text>
             </Text>
@@ -159,18 +168,18 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
 
           {/* Forgot */}
-          <TouchableOpacity onPress={() => {}} style={styles.forgotWrapper}>
+          <TouchableOpacity onPress={() => { }} style={styles.forgotWrapper}>
             <Text style={[styles.forgotText, { color: theme.colors.accent }]}>Forgot password?</Text>
           </TouchableOpacity>
 
           {/* Primary CTA */}
           <TouchableOpacity
-            style={[styles.btnPrimary, loading && { opacity: 0.7 }]}
+            style={[styles.btnPrimary, { backgroundColor: theme.colors.textPrimary }, loading && { opacity: 0.7 }]}
             onPress={handleLogin}
             disabled={loading}
             activeOpacity={0.85}
           >
-            <Text style={styles.btnText}>{loading ? 'Logging in…' : 'Log in'}</Text>
+            <Text style={[styles.btnText, { color: theme.colors.background }]}>{loading ? 'Logging in…' : 'Log in'}</Text>
           </TouchableOpacity>
 
           {/* Divider */}
@@ -236,7 +245,7 @@ const styles = StyleSheet.create({
     marginTop: 72,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 0,
     marginBottom: 28,
   },
   logoIcon: {
@@ -248,6 +257,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoText: {
+    marginLeft: -25,
     color: '#fff',
     fontSize: 20,
     fontWeight: '600',

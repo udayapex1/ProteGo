@@ -17,15 +17,6 @@ import ThemeToggle from '../../components/ThemeToggle';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const ACCENT        = '#7C3AED';
-const ACCENT_LIGHT  = '#F3F0FF';
-const DANGER        = '#E11D48';
-const DANGER_LIGHT  = '#FFF5F6';
-const DANGER_MID    = '#FFE4E8';
-const DANGER_BORDER = '#FFD9DF';
-const SUCCESS       = '#16A34A';
-const SUCCESS_LIGHT = '#F0FDF4';
-
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
   const { theme } = useAppTheme();
@@ -82,11 +73,11 @@ export default function ProfileScreen() {
         {/* Avatar */}
         <View style={styles.avatarWrap}>
           <View style={styles.avatarOuter}>
-            <View style={styles.avatar}>
+            <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
               <Text style={styles.avatarText}>{getInitials(user?.name)}</Text>
             </View>
             {/* Edit badge */}
-            <View style={styles.editBadge}>
+            <View style={[styles.editBadge, { backgroundColor: theme.colors.primary }]}>
               <Ionicons name="pencil" size={9} color="#fff" />
             </View>
           </View>
@@ -110,17 +101,17 @@ export default function ProfileScreen() {
 
         {/* Stats strip */}
         <View style={styles.statsRow}>
-          <View style={[styles.statBox, { backgroundColor: ACCENT_LIGHT }]}>
-            <Text style={[styles.statNum, { color: ACCENT }]}>12</Text>
-            <Text style={[styles.statLabel, { color: '#9F7AEA' }]}>Days active</Text>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.primaryLight }]}>
+            <Text style={[styles.statNum, { color: theme.colors.primary }]}>12</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.primary }]}>Days active</Text>
           </View>
-          <View style={[styles.statBox, { backgroundColor: SUCCESS_LIGHT }]}>
-            <Text style={[styles.statNum, { color: SUCCESS }]}>1</Text>
-            <Text style={[styles.statLabel, { color: '#86EFAC' }]}>Connected</Text>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.successLight }]}>
+            <Text style={[styles.statNum, { color: theme.colors.success }]}>1</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.success }]}>Connected</Text>
           </View>
-          <View style={[styles.statBox, { backgroundColor: '#FFF7ED' }]}>
-            <Text style={[styles.statNum, { color: '#EA580C' }]}>3</Text>
-            <Text style={[styles.statLabel, { color: '#FDB178' }]}>Alerts</Text>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.dangerLight }]}>
+            <Text style={[styles.statNum, { color: theme.colors.danger }]}>3</Text>
+            <Text style={[styles.statLabel, { color: theme.colors.danger }]}>Alerts</Text>
           </View>
         </View>
 
@@ -128,36 +119,36 @@ export default function ProfileScreen() {
         <Text style={sectionTitleStyle}>Security</Text>
 
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: ACCENT_LIGHT }]}>
-            <Ionicons name="shield-half-outline" size={17} color={ACCENT} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
+            <Ionicons name="shield-half-outline" size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Two-factor authentication</Text>
             <Text style={rowSubStyle}>Extra layer of account security</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, twoFactorEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, twoFactorEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setTwoFactorEnabled(!twoFactorEnabled)}
             activeOpacity={0.8}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: ACCENT_LIGHT }]}>
-            <Ionicons name="finger-print-outline" size={17} color={ACCENT} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
+            <Ionicons name="finger-print-outline" size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Biometric login</Text>
             <Text style={rowSubStyle}>Use fingerprint to sign in</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, biometricEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, biometricEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setBiometricEnabled(!biometricEnabled)}
             activeOpacity={0.8}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
@@ -165,35 +156,35 @@ export default function ProfileScreen() {
         <Text style={sectionTitleStyle}>Family</Text>
 
         <TouchableOpacity style={rowCardStyle} activeOpacity={0.7}>
-          <View style={[styles.rowIcon, { backgroundColor: SUCCESS_LIGHT }]}>
-            <Ionicons name="link-outline" size={17} color={SUCCESS} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.successLight }]}>
+            <Ionicons name="link-outline" size={17} color={theme.colors.success} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Paired account</Text>
-            <Text style={[rowSubStyle, user?.pairedWith && { color: SUCCESS }]}>
+            <Text style={[rowSubStyle, user?.pairedWith && { color: theme.colors.success }]}>
               {user?.pairedWith ? '● Connected' : 'Not paired yet'}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#ccc" />
+          <Ionicons name="chevron-forward" size={16} color={theme.colors.textSubtle} />
         </TouchableOpacity>
 
         {/* ── Notifications ── */}
         <Text style={sectionTitleStyle}>Notifications</Text>
 
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: DANGER_MID }]}>
-            <Ionicons name="notifications-outline" size={17} color={DANGER} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
+            <Ionicons name="notifications-outline" size={17} color={theme.colors.danger} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Push notifications</Text>
             <Text style={rowSubStyle}>SOS, geofence & battery alerts</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, notificationsEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, notificationsEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setNotificationsEnabled(!notificationsEnabled)}
             activeOpacity={0.8}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
@@ -217,14 +208,17 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.accountBtn, styles.logoutBtn]}
+            style={[
+              styles.accountBtn,
+              { backgroundColor: theme.colors.dangerLight, borderColor: theme.colors.dangerLight },
+            ]}
             onPress={handleLogout}
             activeOpacity={0.7}
           >
-            <View style={[styles.rowIcon, { backgroundColor: DANGER_MID }]}>
-              <Ionicons name="log-out-outline" size={17} color={DANGER} />
+            <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
+              <Ionicons name="log-out-outline" size={17} color={theme.colors.danger} />
             </View>
-            <Text style={styles.logoutBtnText}>Log out</Text>
+            <Text style={[styles.logoutBtnText, { color: theme.colors.danger }]}>Log out</Text>
           </TouchableOpacity>
         </View>
 
@@ -286,7 +280,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: ACCENT,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2.5,
@@ -304,7 +297,6 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: ACCENT,
     borderWidth: 2,
     borderColor: '#0a0a0a',
     alignItems: 'center',
@@ -427,14 +419,6 @@ const styles = StyleSheet.create({
     padding: 3,
     justifyContent: 'center',
   },
-  toggleOn: {
-    backgroundColor: ACCENT,
-    alignItems: 'flex-end',
-  },
-  toggleOff: {
-    backgroundColor: '#e5e5e5',
-    alignItems: 'flex-start',
-  },
   toggleDot: {
     width: 20,
     height: 20,
@@ -465,13 +449,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#111',
   },
-  logoutBtn: {
-    backgroundColor: DANGER_LIGHT,
-    borderColor: DANGER_BORDER,
-  },
   logoutBtnText: {
     fontSize: 13,
     fontWeight: '500',
-    color: DANGER,
   },
 });

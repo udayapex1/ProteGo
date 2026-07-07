@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import MapView, { Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
@@ -21,17 +22,7 @@ import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { ZonesStackParamList } from '../../navigation/ZonesStackNavigator';
-
-const darkMapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a2a' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#666' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d0d0d' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-];
+import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
 
 type NavProp = StackNavigationProp<ZonesStackParamList, 'CreateZone'>;
 type RouteProps = RouteProp<ZonesStackParamList, 'CreateZone'>;
@@ -49,6 +40,8 @@ export default function CreateZoneScreen() {
   const [center, setCenter] = useState({ latitude: 22.7196, longitude: 75.8577 });
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const fullscreenMapRef = useRef<MapView>(null);
 
   useEffect(() => {
     initializeScreen();
@@ -127,6 +120,8 @@ export default function CreateZoneScreen() {
     );
   }
 
+  const activeMapStyle = theme.isDark ? darkMapStyle : lightMapStyle;
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -141,11 +136,11 @@ export default function CreateZoneScreen() {
           <ThemeToggle />
         </View>
 
-        <View style={styles.mapWrapper}>
+        <View style={[styles.mapWrapper, { backgroundColor: theme.colors.card }]}>
           <MapView
             ref={mapRef}
             style={styles.map}
-            customMapStyle={darkMapStyle}
+            customMapStyle={activeMapStyle}
             initialRegion={{
               latitude: center.latitude,
               longitude: center.longitude,
@@ -157,7 +152,7 @@ export default function CreateZoneScreen() {
             <Circle
               center={center}
               radius={radius}
-              strokeColor={colors.primary}
+              strokeColor={theme.colors.primary}
               fillColor="rgba(122,28,172,0.15)"
               strokeWidth={1.5}
             />
@@ -165,30 +160,79 @@ export default function CreateZoneScreen() {
 
           {/* Fixed center pin — map move hota hai, pin center mein fixed rehta hai */}
           <View style={styles.centerPinWrapper} pointerEvents="none">
-            <View style={styles.centerPin} />
+            <View style={[styles.centerPin, { backgroundColor: theme.colors.primary }]} />
           </View>
 
           <View style={styles.mapHint}>
-            <Text style={styles.mapHintText}>Drag map to position the zone</Text>
+            <Text style={[styles.mapHintText, { color: theme.colors.textMuted }]}>Drag map to position the zone</Text>
           </View>
+          
+          <TouchableOpacity
+            style={styles.fullscreenBtn}
+            onPress={() => setIsMapFullscreen(true)}
+          >
+            <Ionicons name="expand-outline" size={16} color="#fff" />
+          </TouchableOpacity>
         </View>
 
+        <Modal
+          visible={isMapFullscreen}
+          animationType="fade"
+          onRequestClose={() => setIsMapFullscreen(false)}
+        >
+          <View style={[styles.fullscreenContainer, { backgroundColor: theme.colors.background }]}>
+            <MapView
+              ref={fullscreenMapRef}
+              style={styles.fullscreenMap}
+              customMapStyle={activeMapStyle}
+              initialRegion={{
+                latitude: center.latitude,
+                longitude: center.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              onRegionChangeComplete={handleRegionChangeComplete}
+            >
+              <Circle
+                center={center}
+                radius={radius}
+                strokeColor={theme.colors.primary}
+                fillColor="rgba(122,28,172,0.15)"
+                strokeWidth={1.5}
+              />
+            </MapView>
+
+            <View style={styles.centerPinWrapper} pointerEvents="none">
+              <View style={[styles.centerPin, { backgroundColor: theme.colors.primary }]} />
+            </View>
+
+            <SafeAreaView style={styles.fullscreenTopBar} edges={['top']}>
+              <TouchableOpacity
+                style={styles.closeFullscreenBtn}
+                onPress={() => setIsMapFullscreen(false)}
+              >
+                <Ionicons name="close" size={20} color="#fff" />
+              </TouchableOpacity>
+            </SafeAreaView>
+          </View>
+        </Modal>
+
         <View style={styles.formCard}>
-          <Text style={styles.inputLabel}>Zone name</Text>
-          <View style={styles.inputPill}>
-            <Ionicons name="pricetag-outline" size={14} color="#999" />
+          <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Zone name</Text>
+          <View style={[styles.inputPill, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <Ionicons name="pricetag-outline" size={14} color={theme.colors.textSubtle} />
             <TextInput
-              style={styles.inputField}
+              style={[styles.inputField, { color: theme.colors.text }]}
               placeholder="e.g. Home, School, Grandma's"
-              placeholderTextColor="#bbb"
+              placeholderTextColor={theme.colors.textMuted}
               value={name}
               onChangeText={setName}
             />
           </View>
 
           <View style={styles.radiusRow}>
-            <Text style={styles.inputLabel}>Radius</Text>
-            <Text style={styles.radiusVal}>{Math.round(radius)} m</Text>
+            <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Radius</Text>
+            <Text style={[styles.radiusVal, { color: theme.colors.primary }]}>{Math.round(radius)} m</Text>
           </View>
           <Slider
             style={{ width: '100%', height: 30 }}
@@ -197,17 +241,17 @@ export default function CreateZoneScreen() {
             step={50}
             value={radius}
             onValueChange={setRadius}
-            minimumTrackTintColor={colors.primary}
-            maximumTrackTintColor="#eee"
-            thumbTintColor={colors.primary}
+            minimumTrackTintColor={theme.colors.primary}
+            maximumTrackTintColor={theme.colors.border}
+            thumbTintColor={theme.colors.primary}
           />
 
           <TouchableOpacity
-            style={[styles.saveBtn, loading && { opacity: 0.7 }]}
+            style={[styles.saveBtn, loading && { opacity: 0.7 }, { backgroundColor: theme.colors.text }]}
             onPress={handleSave}
             disabled={loading}
           >
-            <Text style={styles.saveText}>
+            <Text style={[styles.saveText, { color: theme.colors.background }]}>
               {loading ? 'Saving...' : isEditing ? 'Update zone' : 'Create zone'}
             </Text>
           </TouchableOpacity>
@@ -282,6 +326,43 @@ const styles = StyleSheet.create({
   mapHintText: {
     color: 'rgba(255,255,255,0.5)',
     fontSize: fontSize.xs,
+  },
+  fullscreenBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullscreenContainer: {
+    flex: 1,
+  },
+  fullscreenMap: {
+    width: '100%',
+    height: '100%',
+  },
+  fullscreenTopBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  closeFullscreenBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formCard: {
     marginHorizontal: spacing.xl,

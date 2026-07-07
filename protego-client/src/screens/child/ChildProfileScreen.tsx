@@ -89,81 +89,81 @@ export default function ChildProfileScreen() {
         <Text style={sectionTitleStyle}>Sharing</Text>
 
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.successLight }]}>
-            <Ionicons name="location-outline" size={17} color={colors.success} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.successLight }]}>
+            <Ionicons name="location-outline" size={17} color={theme.colors.success} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Share my location</Text>
             <Text style={rowSubStyle}>Visible to your paired parent</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, shareLocationEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, shareLocationEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setShareLocationEnabled(!shareLocationEnabled)}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
         <Text style={sectionTitleStyle}>Security</Text>
 
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.primaryLight }]}>
-            <Ionicons name="shield-half-outline" size={17} color={colors.primary} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
+            <Ionicons name="shield-half-outline" size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Two-factor authentication</Text>
             <Text style={rowSubStyle}>Extra layer of account security</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, twoFactorEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, twoFactorEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setTwoFactorEnabled(!twoFactorEnabled)}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.primaryLight }]}>
-            <Ionicons name="finger-print-outline" size={17} color={colors.primary} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
+            <Ionicons name="finger-print-outline" size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Biometric login</Text>
             <Text style={rowSubStyle}>Use fingerprint to sign in</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, biometricEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, biometricEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setBiometricEnabled(!biometricEnabled)}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
         <Text style={sectionTitleStyle}>Emergency</Text>
         <TouchableOpacity style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.dangerLight }]}>
-            <Ionicons name="alert-circle-outline" size={17} color={colors.danger} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
+            <Ionicons name="alert-circle-outline" size={17} color={theme.colors.danger} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>SOS history</Text>
             <Text style={rowSubStyle}>View past emergency alerts</Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#ccc" />
+          <Ionicons name="chevron-forward" size={16} color={theme.colors.textSubtle} />
         </TouchableOpacity>
 
         <Text style={sectionTitleStyle}>Notifications</Text>
         <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.dangerLight }]}>
-            <Ionicons name="notifications-outline" size={17} color={colors.danger} />
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
+            <Ionicons name="notifications-outline" size={17} color={theme.colors.danger} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Push notifications</Text>
             <Text style={rowSubStyle}>Zone alerts & reminders</Text>
           </View>
           <TouchableOpacity
-            style={[styles.toggle, notificationsEnabled ? styles.toggleOn : styles.toggleOff]}
+            style={[styles.toggle, notificationsEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
             onPress={() => setNotificationsEnabled(!notificationsEnabled)}
           >
-            <View style={styles.toggleDot} />
+            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
           </TouchableOpacity>
         </View>
 
@@ -175,15 +175,15 @@ export default function ChildProfileScreen() {
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Edit profile</Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#ccc" />
+          <Ionicons name="chevron-forward" size={16} color={theme.colors.textSubtle} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[rowCardStyle, styles.dangerRow]} onPress={handleLogout}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.dangerLight }]}>
-            <Ionicons name="log-out-outline" size={17} color={colors.danger} />
+        <TouchableOpacity style={[rowCardStyle, { backgroundColor: theme.colors.dangerLight, borderColor: theme.colors.dangerLight }]} onPress={handleLogout}>
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
+            <Ionicons name="log-out-outline" size={17} color={theme.colors.danger} />
           </View>
           <View style={styles.rowText}>
-            <Text style={[styles.rowTitle, styles.dangerText]}>Log out</Text>
+            <Text style={[styles.rowTitle, { color: theme.colors.danger }]}>Log out</Text>
           </View>
         </TouchableOpacity>
       </View>

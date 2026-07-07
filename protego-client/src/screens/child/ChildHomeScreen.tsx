@@ -6,13 +6,17 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import MapView, { Marker, Circle, Polyline } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { useAuth } from '../../context/AuthContext';
+import { useAppTheme } from '../../context/ThemeContext';
+import ThemeToggle from '../../components/ThemeToggle';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
+import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
 import { locationApi } from '../../api/location.api';
 import { geofenceApi } from '../../api/geofence.api';
 import { Geofence } from '../../types/location.types';
@@ -21,21 +25,11 @@ import {
 } from '../../services/locationTracking.service';
 import { getWalkingOrDrivingRoute } from '../../api/directions.api';
 
-const darkMapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a2a' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#666' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d0d0d' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-];
-
 const SOS_THUMB_SIZE = 50;
 
 export default function ChildHomeScreen() {
   const { user } = useAuth();
+  const { theme } = useAppTheme();
   const [myLocation, setMyLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [zones, setZones] = useState<Geofence[]>([]);
   const [isTracking, setIsTracking] = useState(false);
@@ -47,7 +41,9 @@ export default function ChildHomeScreen() {
     durationText: string;
   } | null>(null);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const mapRef = useRef<MapView>(null);
+  const fullscreenMapRef = useRef<MapView>(null);
   const watchSubscription = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
@@ -141,18 +137,23 @@ export default function ChildHomeScreen() {
     }
   };
 
+  const activeMapStyle = theme.isDark ? darkMapStyle : lightMapStyle;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greetingSub}>Your location</Text>
-          <Text style={styles.greeting}>{user?.name?.split(' ')[0]}</Text>
+          <Text style={[styles.greetingSub, { color: theme.colors.textMuted }]}>Your location</Text>
+          <Text style={[styles.greeting, { color: theme.colors.text }]}>{user?.name?.split(' ')[0]}</Text>
         </View>
-        <View style={[styles.statusChip, isTracking ? styles.statusChipOn : styles.statusChipOff]}>
-          <View style={[styles.statusDot, { backgroundColor: isTracking ? colors.success : '#ccc' }]} />
-          <Text style={[styles.statusChipText, { color: isTracking ? colors.success : '#999' }]}>
-            {isTracking ? 'Sharing live' : 'Not sharing'}
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <ThemeToggle />
+          <View style={[styles.statusChip, isTracking ? styles.statusChipOn : styles.statusChipOff, { backgroundColor: isTracking ? theme.colors.successLight : theme.colors.surface, borderColor: theme.colors.border, borderWidth: 1 }]}>
+            <View style={[styles.statusDot, { backgroundColor: isTracking ? colors.success : '#ccc' }]} />
+            <Text style={[styles.statusChipText, { color: isTracking ? colors.success : theme.colors.textMuted }]}>
+              {isTracking ? 'Sharing live' : 'Not sharing'}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -161,7 +162,7 @@ export default function ChildHomeScreen() {
           <MapView
             ref={mapRef}
             style={styles.map}
-            customMapStyle={darkMapStyle}
+            customMapStyle={activeMapStyle}
             initialRegion={{
               latitude: myLocation.latitude,
               longitude: myLocation.longitude,
@@ -223,33 +224,143 @@ export default function ChildHomeScreen() {
         )}
 
         {myLocation && (
-          <View style={styles.mapBottom}>
-            <View style={styles.mapStatus}>
-              <View style={styles.liveDot} />
-              <Text style={styles.liveText}>{route ? `${route.distanceText} · ${route.durationText}` : 'Choose a zone route'}</Text>
+          <>
+            <View style={styles.mapOverlay} pointerEvents="none" />
+            
+            <TouchableOpacity
+              style={styles.fullscreenBtn}
+              onPress={() => setIsMapFullscreen(true)}
+              disabled={!myLocation}
+            >
+              <Ionicons name="expand-outline" size={16} color="#fff" />
+            </TouchableOpacity>
+
+            <View style={styles.mapBottom}>
+              <View style={styles.mapStatus}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveText}>{route ? `${route.distanceText} · ${route.durationText}` : 'Choose a zone route'}</Text>
+              </View>
             </View>
-          </View>
+          </>
         )}
       </View>
 
-      <Text style={styles.sectionTitle}>Your zones</Text>
+      <Modal
+        visible={isMapFullscreen}
+        animationType="fade"
+        onRequestClose={() => setIsMapFullscreen(false)}
+      >
+        <View style={[styles.fullscreenContainer, { backgroundColor: theme.colors.background }]}>
+          {myLocation && (
+            <MapView
+              ref={fullscreenMapRef}
+              style={styles.fullscreenMap}
+              customMapStyle={activeMapStyle}
+              initialRegion={{
+                latitude: myLocation.latitude,
+                longitude: myLocation.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              onMapReady={() => {
+                if (route?.coordinates.length) {
+                  fullscreenMapRef.current?.fitToCoordinates(route.coordinates, {
+                    edgePadding: { top: 80, right: 60, bottom: 90, left: 60 },
+                    animated: false,
+                  });
+                } else {
+                  fullscreenMapRef.current?.animateToRegion({
+                    latitude: myLocation.latitude,
+                    longitude: myLocation.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }, 0);
+                }
+              }}
+            >
+              <Marker coordinate={myLocation}>
+                <View style={styles.markerOuter}>
+                  <View style={styles.markerInner} />
+                </View>
+              </Marker>
+
+              {zones.map((zone) => {
+                if (zone._id !== selectedZoneId) return null;
+                return (
+                  <Marker key={`${zone._id}-destination`} coordinate={getZoneCenter(zone)}>
+                    <View style={styles.destinationMarker}>
+                      <Ionicons name="flag" size={14} color="#fff" />
+                    </View>
+                  </Marker>
+                );
+              })}
+
+              {route && (
+                <Polyline
+                  coordinates={route.coordinates}
+                  strokeColor={theme.colors.primary}
+                  strokeWidth={4}
+                />
+              )}
+
+              {zones.map((zone) => (
+                <Circle
+                  key={zone._id}
+                  center={{
+                    latitude: zone.center.coordinates[1],
+                    longitude: zone.center.coordinates[0],
+                  }}
+                  radius={zone.radius}
+                  strokeColor={theme.colors.primary}
+                  fillColor="rgba(122,28,172,0.12)"
+                  strokeWidth={1.5}
+                />
+              ))}
+            </MapView>
+          )}
+
+          <SafeAreaView style={styles.fullscreenTopBar} edges={['top']}>
+            <TouchableOpacity
+              style={styles.closeFullscreenBtn}
+              onPress={() => setIsMapFullscreen(false)}
+            >
+              <Ionicons name="close" size={20} color="#fff" />
+            </TouchableOpacity>
+            
+            {route && (
+              <View style={styles.routeChip}>
+                <Ionicons name="navigate-outline" size={12} color="#fff" />
+                <Text style={styles.routeChipText}>
+                  {route.distanceText} · {route.durationText}
+                </Text>
+              </View>
+            )}
+          </SafeAreaView>
+        </View>
+      </Modal>
+
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Your zones</Text>
       <View style={styles.zoneScroll}>
         {zones.length === 0 ? (
-          <Text style={styles.emptyZonesText}>No zones set by your parent yet</Text>
+          <Text style={[styles.emptyZonesText, { color: theme.colors.textMuted }]}>No zones set by your parent yet</Text>
         ) : (
           zones.map((zone) => (
             <TouchableOpacity
               key={zone._id}
-              style={[styles.zoneChip, selectedZoneId === zone._id && styles.zoneChipSelected]}
+              style={[
+                styles.zoneChip,
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                selectedZoneId === zone._id && { backgroundColor: theme.colors.primaryLight, borderColor: theme.colors.primary }
+              ]}
               onPress={() => handleShowRouteToZone(zone)}
               disabled={!myLocation || routeLoading}
             >
-              <Ionicons name="home-outline" size={14} color={colors.primary} />
-              <Text style={styles.zoneChipText}>{zone.name}</Text>
+              <Ionicons name="home-outline" size={14} color={theme.colors.primary} />
+              <Text style={[styles.zoneChipText, { color: theme.colors.text }]}>{zone.name}</Text>
               {routeLoading && selectedZoneId === zone._id ? (
-                <ActivityIndicator size="small" color={colors.primary} />
+                <ActivityIndicator size="small" color={theme.colors.primary} />
               ) : (
-                <Ionicons name="navigate-outline" size={14} color={colors.primary} />
+                <Ionicons name="navigate-outline" size={14} color={theme.colors.primary} />
               )}
             </TouchableOpacity>
           ))
@@ -340,6 +451,65 @@ const styles = StyleSheet.create({
   mapPlaceholderText: {
     color: '#555',
     fontSize: fontSize.sm,
+  },
+  mapOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  fullscreenBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullscreenContainer: {
+    flex: 1,
+  },
+  fullscreenMap: {
+    width: '100%',
+    height: '100%',
+  },
+  fullscreenTopBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  closeFullscreenBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  routeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(122,28,172,0.9)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  routeChipText: {
+    color: '#fff',
+    fontSize: fontSize.xs,
+    fontWeight: '500',
   },
   markerOuter: {
     width: 28,

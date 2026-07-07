@@ -73,7 +73,7 @@ export default function ZonesScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <ThemeToggle />
           <TouchableOpacity
-            style={styles.addBtn}
+            style={[styles.addBtn, { backgroundColor: theme.colors.primary }]}
             onPress={() => navigation.navigate('CreateZone', undefined)}
           >
             <Ionicons name="add" size={18} color="#fff" />
@@ -84,47 +84,47 @@ export default function ZonesScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {zones.length === 0 && !loading ? (
           <View style={styles.emptyState}>
-            <View style={styles.emptyIcon}>
-              <Ionicons name="map-outline" size={26} color={colors.primary} />
+            <View style={[styles.emptyIcon, { backgroundColor: theme.colors.primaryLight }]}>
+              <Ionicons name="map-outline" size={26} color={theme.colors.primary} />
             </View>
-            <Text style={styles.emptyTitle}>No zones yet</Text>
-            <Text style={styles.emptySub}>Create your first safety zone to get alerts</Text>
+            <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>No zones yet</Text>
+            <Text style={[styles.emptySub, { color: theme.colors.textMuted }]}>Create your first safety zone to get alerts</Text>
             <TouchableOpacity
-              style={styles.emptyCta}
+              style={[styles.emptyCta, { backgroundColor: theme.colors.text }]}
               onPress={() => navigation.navigate('CreateZone', undefined)}
             >
-              <Text style={styles.emptyCtaText}>Create zone</Text>
+              <Text style={[styles.emptyCtaText, { color: theme.colors.background }]}>Create zone</Text>
             </TouchableOpacity>
           </View>
         ) : (
           zones.map((zone) => (
-            <View key={zone._id} style={styles.zoneCard}>
+            <View key={zone._id} style={[styles.zoneCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <View style={styles.zoneRow}>
-                <View style={styles.zoneIcon}>
-                  <Ionicons name="home-outline" size={20} color={colors.primary} />
+                <View style={[styles.zoneIcon, { backgroundColor: theme.colors.primaryLight }]}>
+                  <Ionicons name="home-outline" size={20} color={theme.colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.zoneName}>{zone.name}</Text>
-                  <Text style={styles.zoneSub}>{zone.radius}m radius</Text>
+                  <Text style={[styles.zoneName, { color: theme.colors.text }]}>{zone.name}</Text>
+                  <Text style={[styles.zoneSub, { color: theme.colors.textMuted }]}>{zone.radius}m radius</Text>
                 </View>
               </View>
 
               <View style={styles.zoneActions}>
                 <TouchableOpacity
-                  style={styles.actionBtn}
+                  style={[styles.actionBtn, { borderColor: theme.colors.border }]}
                   onPress={() =>
                     navigation.navigate('CreateZone', { zoneId: zone._id })
                   }
                 >
-                  <Ionicons name="create-outline" size={14} color="#555" />
-                  <Text style={styles.actionText}>Edit</Text>
+                  <Ionicons name="create-outline" size={14} color={theme.colors.textMuted} />
+                  <Text style={[styles.actionText, { color: theme.colors.textMuted }]}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.actionBtn}
+                  style={[styles.actionBtn, { borderColor: theme.colors.border }]}
                   onPress={() => handleDelete(zone)}
                 >
-                  <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                  <Text style={[styles.actionText, styles.deleteText]}>Delete</Text>
+                  <Ionicons name="trash-outline" size={14} color={theme.colors.danger} />
+                  <Text style={[styles.actionText, { color: theme.colors.danger }]}>Delete</Text>
                 </TouchableOpacity>
               </View>
             </View>

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Modal,
 } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -15,17 +16,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
 import { locationApi } from '../../api/location.api';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
-
-const darkMapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a2a' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#666' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d0d0d' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-];
+import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
+import ThemeToggle from '../../components/ThemeToggle';
 
 interface HistoryPoint {
   latitude: number;
@@ -100,7 +92,9 @@ export default function HistoryScreen() {
   const [points, setPoints] = useState<HistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const mapRef = useRef<MapView>(null);
+  const fullscreenMapRef = useRef<MapView>(null);
 
   useEffect(() => {
     loadHistory();
@@ -158,14 +152,19 @@ export default function HistoryScreen() {
     if (Platform.OS === 'android') setShowPicker(false);
   };
 
+  const activeMapStyle = theme.isDark ? darkMapStyle : lightMapStyle;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: theme.colors.text }]}>History</Text>
-        <TouchableOpacity style={styles.dateBtn} onPress={() => setShowPicker(true)}>
-          <Ionicons name="calendar-outline" size={14} color={colors.primary} />
-          <Text style={styles.dateBtnText}>{formatDateLabel(selectedDate)}</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <ThemeToggle />
+          <TouchableOpacity style={[styles.dateBtn, { backgroundColor: theme.colors.primaryLight }]} onPress={() => setShowPicker(true)}>
+            <Ionicons name="calendar-outline" size={14} color={theme.colors.primary} />
+            <Text style={[styles.dateBtnText, { color: theme.colors.primary }]}>{formatDateLabel(selectedDate)}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {showPicker && (
@@ -178,12 +177,12 @@ export default function HistoryScreen() {
         />
       )}
 
-      <View style={styles.mapWrapper}>
+      <View style={[styles.mapWrapper, { backgroundColor: theme.colors.card }]}>
         {points.length > 0 ? (
           <MapView
             ref={mapRef}
             style={styles.map}
-            customMapStyle={theme.isDark ? darkMapStyle : []}
+            customMapStyle={activeMapStyle}
             initialRegion={{
               latitude: points[0].latitude,
               longitude: points[0].longitude,
@@ -244,12 +243,84 @@ export default function HistoryScreen() {
         ) : (
           <View style={styles.mapPlaceholder}>
             <Ionicons name="map-outline" size={26} color="#999" />
-            <Text style={styles.mapPlaceholderText}>
+            <Text style={[styles.mapPlaceholderText, { color: theme.colors.textMuted }]}>
               {loading ? 'Loading history...' : 'No location data for this day'}
             </Text>
           </View>
         )}
+        
+        {points.length > 0 && (
+          <TouchableOpacity
+            style={styles.fullscreenBtn}
+            onPress={() => setIsMapFullscreen(true)}
+          >
+            <Ionicons name="expand-outline" size={16} color="#fff" />
+          </TouchableOpacity>
+        )}
       </View>
+
+      <Modal
+        visible={isMapFullscreen}
+        animationType="fade"
+        onRequestClose={() => setIsMapFullscreen(false)}
+      >
+        <View style={[styles.fullscreenContainer, { backgroundColor: theme.colors.background }]}>
+          {points.length > 0 && (
+            <MapView
+              ref={fullscreenMapRef}
+              style={styles.fullscreenMap}
+              customMapStyle={activeMapStyle}
+              initialRegion={{
+                latitude: points[0].latitude,
+                longitude: points[0].longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              onMapReady={() => {
+                fullscreenMapRef.current?.fitToCoordinates(points, {
+                  edgePadding: { top: 80, right: 60, bottom: 60, left: 60 },
+                  animated: false,
+                });
+              }}
+            >
+              <Polyline coordinates={points} strokeColor={colors.primary} strokeWidth={3} />
+              {points.map((point, index) => {
+                const isFirst = index === 0;
+                const isLast = index === points.length - 1;
+                const isSelected = selectedPointIndex === index;
+
+                if (!isFirst && !isLast && !isSelected) {
+                  return (
+                    <Marker key={index} coordinate={point} onPress={() => setSelectedPointIndex(index)}>
+                      <View style={styles.dotMarker} />
+                    </Marker>
+                  );
+                }
+
+                return (
+                  <Marker key={index} coordinate={point} onPress={() => setSelectedPointIndex(index)}>
+                    <View style={[styles.pinMarker, isFirst && styles.pinStart, isLast && styles.pinEnd]}>
+                      <Ionicons name={isFirst ? 'play' : isLast ? 'flag' : 'time-outline'} size={12} color="#fff" />
+                    </View>
+                    <View style={styles.timeLabel}>
+                      <Text style={styles.timeLabelText}>{formatTime(point.timestamp)}</Text>
+                    </View>
+                  </Marker>
+                );
+              })}
+            </MapView>
+          )}
+
+          <SafeAreaView style={styles.fullscreenTopBar} edges={['top']}>
+            <TouchableOpacity
+              style={styles.closeFullscreenBtn}
+              onPress={() => setIsMapFullscreen(false)}
+            >
+              <Ionicons name="close" size={20} color="#fff" />
+            </TouchableOpacity>
+          </SafeAreaView>
+        </View>
+      </Modal>
 
       <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
         Stops ({points.length})
@@ -342,6 +413,43 @@ const styles = StyleSheet.create({
   mapPlaceholderText: {
     color: '#999',
     fontSize: fontSize.sm,
+  },
+  fullscreenBtn: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullscreenContainer: {
+    flex: 1,
+  },
+  fullscreenMap: {
+    width: '100%',
+    height: '100%',
+  },
+  fullscreenTopBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  closeFullscreenBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotMarker: {
     width: 8,

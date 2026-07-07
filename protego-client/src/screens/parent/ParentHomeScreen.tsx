@@ -22,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { getWalkingOrDrivingRoute } from '../../api/directions.api';
+import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
 
 interface LiveLocation {
   latitude: number;
@@ -30,32 +31,6 @@ interface LiveLocation {
   network: 'online' | 'offline';
   timestamp: string;
 }
-
-const darkMapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a1a' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a2a' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#666' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d0d0d' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: '#333' }] },
-];
-
-// Light counterpart of darkMapStyle — same feature toggles (POIs/transit hidden),
-// swapped to a soft, clean light palette so it matches the rest of the light theme.
-const lightMapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#9a9a9a' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#aaaaaa' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#e0e6f0' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: '#d9d9d9' }] },
-];
 
 // Formats a meter value as "123 m" or "1.2 km" — used for the straight-line distance label.
 const formatDistance = (meters: number): string => {
@@ -85,10 +60,10 @@ export default function ParentHomeScreen() {
   // map content (markers, route, zones), since RN has no native map fullscreen API.
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
-const mapRef = useRef<MapView>(null);
-const fullscreenMapRef = useRef<MapView>(null);
-const hasFitMap = useRef(false);
-const hasReceivedSocketUpdate = useRef(false);
+  const mapRef = useRef<MapView>(null);
+  const fullscreenMapRef = useRef<MapView>(null);
+  const hasFitMap = useRef(false);
+  const hasReceivedSocketUpdate = useRef(false);
 
   useEffect(() => {
     loadInitialData();
@@ -122,7 +97,7 @@ const hasReceivedSocketUpdate = useRef(false);
       socketInstance = await connectSocket();
 
       socketInstance.on('location:update', (data: any) => {
-         hasReceivedSocketUpdate.current = true;
+        hasReceivedSocketUpdate.current = true;
         console.log('📍 Live update received:', data);
         setLiveLocation({
           latitude: data.latitude,
@@ -187,30 +162,30 @@ const hasReceivedSocketUpdate = useRef(false);
   }, [parentLocation, liveLocation]);
 
   const loadInitialData = async () => {
-  try {
-    if (user?.pairedWith) {
-      const latest = await locationApi.getLatest(user.pairedWith);
+    try {
+      if (user?.pairedWith) {
+        const latest = await locationApi.getLatest(user.pairedWith);
 
-      // Sirf set karo agar Socket se abhi tak kuch nahi aaya
-     if (latest && !hasReceivedSocketUpdate.current) {
-  setLiveLocation({
-    latitude: latest.location?.coordinates?.[1] ?? latest.latitude,
-    longitude: latest.location?.coordinates?.[0] ?? latest.longitude,
-    battery: latest.battery,
-    network: latest.network,
-    timestamp: latest.createdAt ?? latest.timestamp,
-  });
-}
+        // Sirf set karo agar Socket se abhi tak kuch nahi aaya
+        if (latest && !hasReceivedSocketUpdate.current) {
+          setLiveLocation({
+            latitude: latest.location?.coordinates?.[1] ?? latest.latitude,
+            longitude: latest.location?.coordinates?.[0] ?? latest.longitude,
+            battery: latest.battery,
+            network: latest.network,
+            timestamp: latest.createdAt ?? latest.timestamp,
+          });
+        }
 
-      const fetchedZones = await geofenceApi.getParentZones();
-      setZones(fetchedZones);
+        const fetchedZones = await geofenceApi.getParentZones();
+        setZones(fetchedZones);
+      }
+    } catch (error) {
+      console.log('❌ Failed to load home data:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.log('❌ Failed to load home data:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const isInsideZone = (zone: Geofence) => {
     if (!liveLocation) return false;
@@ -496,7 +471,7 @@ const hasReceivedSocketUpdate = useRef(false);
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.statTop}>
-              <Text style={styles.statLabel}>Battery</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>Battery</Text>
               <Ionicons name="battery-half-outline" size={16} color={colors.success} />
             </View>
             <Text style={[styles.statVal, { color: theme.colors.text }]}>{liveLocation?.battery ?? '--'}%</Text>
@@ -507,7 +482,7 @@ const hasReceivedSocketUpdate = useRef(false);
 
           <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.statTop}>
-              <Text style={styles.statLabel}>Network</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>Network</Text>
               <Ionicons name="wifi-outline" size={16} color={theme.colors.accent} />
             </View>
             <Text style={[styles.statVal, { color: theme.colors.text }]}>{liveLocation?.network === 'online' ? 'Online' : 'Offline'}</Text>
@@ -520,15 +495,15 @@ const hasReceivedSocketUpdate = useRef(false);
               distance + ETA once a route has been fetched via the "Show route" chip. */}
           <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.statTop}>
-              <Text style={styles.statLabel}>{route ? 'Road distance' : 'Distance'}</Text>
+              <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>{route ? 'Road distance' : 'Distance'}</Text>
               <Ionicons name="location-outline" size={16} color={colors.primary} />
             </View>
             <Text style={[styles.statVal, { color: theme.colors.text }]}>
               {route
                 ? route.distanceText
                 : straightDistance !== null
-                ? formatDistance(straightDistance)
-                : '--'}
+                  ? formatDistance(straightDistance)
+                  : '--'}
             </Text>
             <Text style={[styles.statSub, { color: theme.colors.textSubtle }]}>
               {route ? `ETA ${route.durationText}` : 'Straight line'}

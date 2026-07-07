@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Image,
   View,
   Text,
   TextInput,
@@ -21,11 +20,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
 import { UserRole } from "../../types/user.types";
 import { useAppTheme } from "../../context/ThemeContext";
+import { Image } from 'expo-image';
+import ThemeToggle from "../../components/ThemeToggle";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-const ACCENT        = "#7C3AED";
-const ACCENT_LIGHT  = "#F3F0FF";
+const ACCENT = "#7C3AED";
+const ACCENT_LIGHT = "#F3F0FF";
 const ACCENT_BORDER = "rgba(124,58,237,0.2)";
 const ACCENT_ICON_BG = "rgba(124,58,237,0.12)";
 
@@ -68,8 +69,8 @@ function RoleCard({
   onPress: () => void;
 }) {
   const { theme } = useAppTheme();
-  const cardScale  = useRef(new Animated.Value(1)).current;
-  const charFloat  = useRef(new Animated.Value(0)).current;
+  const cardScale = useRef(new Animated.Value(1)).current;
+  const charFloat = useRef(new Animated.Value(0)).current;
   const charOpacity = useRef(new Animated.Value(selected ? 1 : 0.45)).current;
 
   useEffect(() => {
@@ -184,22 +185,22 @@ function RoleCard({
 export default function RegisterScreen({ navigation }: Props) {
   const { register } = useAuth();
   const { theme } = useAppTheme();
-  const [name,     setName]     = useState("");
-  const [email,    setEmail]    = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role,     setRole]     = useState<UserRole>("parent");
-  const [loading,  setLoading]  = useState(false);
-  const [showPwd,  setShowPwd]  = useState(false);
-  const [focused,  setFocused]  = useState<string | null>(null);
+  const [role, setRole] = useState<UserRole>("parent");
+  const [loading, setLoading] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
+  const [focused, setFocused] = useState<string | null>(null);
 
   // 1. Screen entry
-  const screenOpacity   = useRef(new Animated.Value(0)).current;
+  const screenOpacity = useRef(new Animated.Value(0)).current;
   const screenTranslate = useRef(new Animated.Value(40)).current;
 
   // 2. Form fields stagger (name, email, password, role section)
   const fieldAnims = useRef(
     Array.from({ length: 4 }, () => ({
-      opacity:    new Animated.Value(0),
+      opacity: new Animated.Value(0),
       translateY: new Animated.Value(24),
     }))
   ).current;
@@ -208,8 +209,8 @@ export default function RegisterScreen({ navigation }: Props) {
   const btnShake = useRef(new Animated.Value(0)).current;
 
   // 4. CTA pulse while loading
-  const btnPulse     = useRef(new Animated.Value(1)).current;
-  const pulseLoop    = useRef<Animated.CompositeAnimation | null>(null);
+  const btnPulse = useRef(new Animated.Value(1)).current;
+  const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
 
   // Screen entry → then stagger fields
   useEffect(() => {
@@ -253,7 +254,7 @@ export default function RegisterScreen({ navigation }: Props) {
       pulseLoop.current = Animated.loop(
         Animated.sequence([
           Animated.timing(btnPulse, { toValue: 0.95, duration: 400, useNativeDriver: true }),
-          Animated.timing(btnPulse, { toValue: 1,    duration: 400, useNativeDriver: true }),
+          Animated.timing(btnPulse, { toValue: 1, duration: 400, useNativeDriver: true }),
         ])
       );
       pulseLoop.current.start();
@@ -266,12 +267,12 @@ export default function RegisterScreen({ navigation }: Props) {
   const shakeBtn = () => {
     btnShake.setValue(0);
     Animated.sequence([
-      Animated.timing(btnShake, { toValue:  10, duration: 55, useNativeDriver: true }),
+      Animated.timing(btnShake, { toValue: 10, duration: 55, useNativeDriver: true }),
       Animated.timing(btnShake, { toValue: -10, duration: 55, useNativeDriver: true }),
-      Animated.timing(btnShake, { toValue:  8,  duration: 55, useNativeDriver: true }),
-      Animated.timing(btnShake, { toValue: -8,  duration: 55, useNativeDriver: true }),
-      Animated.timing(btnShake, { toValue:  4,  duration: 55, useNativeDriver: true }),
-      Animated.timing(btnShake, { toValue:  0,  duration: 55, useNativeDriver: true }),
+      Animated.timing(btnShake, { toValue: 8, duration: 55, useNativeDriver: true }),
+      Animated.timing(btnShake, { toValue: -8, duration: 55, useNativeDriver: true }),
+      Animated.timing(btnShake, { toValue: 4, duration: 55, useNativeDriver: true }),
+      Animated.timing(btnShake, { toValue: 0, duration: 55, useNativeDriver: true }),
     ]).start();
   };
 
@@ -307,6 +308,9 @@ export default function RegisterScreen({ navigation }: Props) {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <View style={{ position: 'absolute', top: 56, right: 28, zIndex: 10 }}>
+        <ThemeToggle />
+      </View>
       <Animated.View
         style={[
           { flex: 1 },
@@ -336,9 +340,13 @@ export default function RegisterScreen({ navigation }: Props) {
             </TouchableOpacity>
 
             <View style={styles.logoRow}>
-              <View style={styles.logoIcon}>
-                <Text style={{ fontSize: 18 }}>🛡️</Text>
-              </View>
+              {/* <View style={styles.logoIcon}> */}
+              <Image
+                source={{ uri: 'https://res.cloudinary.com/dwemivxbp/image/upload/v1783400959/Protego_logo_uni_l3zaze.png' }}
+                style={{ width: 80, height: 80, borderRadius: 12 }}
+                contentFit="contain"
+              />
+              {/* </View> */}
               <Text style={[styles.logoText, { color: theme.colors.text }]}>
                 Protego<Text style={{ color: ACCENT }}>.</Text>
               </Text>
@@ -459,12 +467,12 @@ export default function RegisterScreen({ navigation }: Props) {
               }}
             >
               <TouchableOpacity
-                style={[styles.btnPrimary, loading && { opacity: 0.8 }]}
+                style={[styles.btnPrimary, { backgroundColor: theme.colors.textPrimary }, loading && { opacity: 0.8 }]}
                 onPress={handleRegister}
                 disabled={loading}
                 activeOpacity={0.85}
               >
-                <Text style={styles.btnText}>
+                <Text style={[styles.btnText, { color: theme.colors.background }]}>
                   {loading ? "Creating account…" : "Create account"}
                 </Text>
               </TouchableOpacity>
@@ -509,7 +517,7 @@ const styles = StyleSheet.create({
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
     marginBottom: 24,
   },
   logoIcon: {

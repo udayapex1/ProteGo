@@ -26,12 +26,20 @@ type AppTheme = {
     input: string;
     inputFocused: string;
     text: string;
+    textPrimary: string;
+    textSecondary: string;
     textMuted: string;
     textSubtle: string;
     border: string;
     tabBar: string;
     toggleSurface: string;
     accent: string;
+    primary: string;
+    primaryLight: string;
+    danger: string;
+    dangerLight: string;
+    success: string;
+    successLight: string;
   };
 };
 
@@ -54,12 +62,20 @@ const lightTheme: AppTheme = {
     input: '#F7F7F7',
     inputFocused: '#F3F0FF',
     text: '#111111',
-    textMuted: '#777777',
+    textPrimary: '#000000',
+    textSecondary: '#999999',
+    textMuted: '#AAAAAA',
     textSubtle: '#AAAAAA',
-    border: '#E8E8E8',
+    border: '#EEEEEE',
     tabBar: '#FFFFFF',
     toggleSurface: '#FFFFFF',
-    accent: '#7C3AED',
+    accent: '#7A1CAC',
+    primary: '#7A1CAC',
+    primaryLight: '#F3E8FA',
+    danger: '#E8003D',
+    dangerLight: '#FFE8EE',
+    success: '#1D9E75',
+    successLight: '#E8F7F1',
   },
 };
 
@@ -69,18 +85,26 @@ const darkTheme: AppTheme = {
   colors: {
     background: '#000000',
     header: ['#000000', '#0A0A0A', '#0F0F0F'],
-    surface: '#111111',
-    card: '#171717',
+    surface: '#1A1A1A',
+    card: '#1A1A1A',
     row: '#1F1F1F',
     input: '#1A1A1A',
     inputFocused: '#211733',
     text: '#FFFFFF',
-    textMuted: '#A8A8A8',
+    textPrimary: '#FFFFFF',
+    textSecondary: '#999999',
+    textMuted: '#666666',
     textSubtle: 'rgba(255,255,255,0.45)',
     border: '#2A2A2A',
     tabBar: '#1A1A1A',
     toggleSurface: '#1F1F1F',
-    accent: '#A78BFA',
+    accent: '#7A1CAC',
+    primary: '#7A1CAC',
+    primaryLight: 'rgba(122,28,172,0.18)',
+    danger: '#E8003D',
+    dangerLight: 'rgba(232,0,61,0.15)',
+    success: '#1D9E75',
+    successLight: 'rgba(29,158,117,0.15)',
   },
 };
 

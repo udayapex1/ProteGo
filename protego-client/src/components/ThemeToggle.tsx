@@ -15,7 +15,7 @@ export default function ThemeToggle({ style }: ThemeToggleProps) {
       accessibilityLabel={`Switch to ${theme.isDark ? 'light' : 'dark'} theme`}
       accessibilityRole="button"
       activeOpacity={0.8}
-      onPress={toggleTheme}
+      onPress={(e) => toggleTheme(e.nativeEvent.pageX, e.nativeEvent.pageY)}
       style={[
         styles.button,
         {
