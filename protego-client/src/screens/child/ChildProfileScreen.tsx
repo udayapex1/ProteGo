@@ -17,7 +17,7 @@ import ThemeToggle from '../../components/ThemeToggle';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-export default function ChildProfileScreen() {
+export default function ChildProfileScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const { theme } = useAppTheme();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -88,21 +88,22 @@ export default function ChildProfileScreen() {
       <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
         <Text style={sectionTitleStyle}>Sharing</Text>
 
-        <View style={rowCardStyle}>
-          <View style={[styles.rowIcon, { backgroundColor: theme.colors.successLight }]}>
-            <Ionicons name="location-outline" size={17} color={theme.colors.success} />
+         <TouchableOpacity
+          style={rowCardStyle}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('PairedAccount')}
+        >
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
+            <Ionicons name="link-outline" size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
-            <Text style={rowTitleStyle}>Share my location</Text>
-            <Text style={rowSubStyle}>Visible to your paired parent</Text>
+            <Text style={rowTitleStyle}>Paired parent</Text>
+            <Text style={[rowSubStyle, user?.pairedWith && { color: theme.colors.success }]}>
+              {user?.pairedWith ? '● Connected' : 'Not paired yet'}
+            </Text>
           </View>
-          <TouchableOpacity
-            style={[styles.toggle, shareLocationEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
-            onPress={() => setShareLocationEnabled(!shareLocationEnabled)}
-          >
-            <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
-          </TouchableOpacity>
-        </View>
+          <Ionicons name="chevron-forward" size={16} color={theme.colors.textSubtle} />
+        </TouchableOpacity>
 
         <Text style={sectionTitleStyle}>Security</Text>
 

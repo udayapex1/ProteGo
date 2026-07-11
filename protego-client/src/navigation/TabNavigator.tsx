@@ -5,14 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { useAppTheme } from '../context/ThemeContext';
 
 import ParentHomeScreen from '../screens/parent/ParentHomeScreen';
-// import ZonesScreen from '../screens/parent/ZonesScreen';
 import ZonesStackNavigator from './ZonesStackNavigator';
 import HistoryScreen from '../screens/parent/HistoryScreen';
-import ProfileScreen from '../screens/parent/ProfileScreen';
+import ParentProfileStackNavigator from './ParentProfileStackNavigator';
 
 import ChildHomeScreen from '../screens/child/ChildHomeScreen';
 import ChildHistoryScreen from '../screens/child/ChildHistoryScreen';
-import ChildProfileScreen from '../screens/child/ChildProfileScreen';
+import ChildProfileStackNavigator from './ChildProfileStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,7 +65,7 @@ export default function TabNavigator() {
         <Tab.Screen name="Home" component={ParentHomeScreen} />
         <Tab.Screen name="Zones" component={ZonesStackNavigator} />
         <Tab.Screen name="History" component={HistoryScreen} />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
+        <Tab.Screen name="Profile" component={ParentProfileStackNavigator} />
       </Tab.Navigator>
     );
   }
@@ -75,7 +74,7 @@ export default function TabNavigator() {
     <Tab.Navigator screenOptions={screenOptions}>
       <Tab.Screen name="Home" component={ChildHomeScreen} />
       <Tab.Screen name="History" component={ChildHistoryScreen} />
-      <Tab.Screen name="Profile" component={ChildProfileScreen} />
+      <Tab.Screen name="Profile" component={ChildProfileStackNavigator} />
     </Tab.Navigator>
   );
 }

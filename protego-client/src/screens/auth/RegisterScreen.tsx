@@ -275,26 +275,28 @@ export default function RegisterScreen({ navigation }: Props) {
       Animated.timing(btnShake, { toValue: 0, duration: 55, useNativeDriver: true }),
     ]).start();
   };
+const handleRegister = async () => {
+  if (!name || !email || !password) {
+    shakeBtn();
+    Alert.alert("Error", "Please fill all fields");
+    return;
+  }
+  setLoading(true);
+  try {
+    await register({ name, email, password, role });
 
-  const handleRegister = async () => {
-    if (!name || !email || !password) {
-      shakeBtn();
-      Alert.alert("Error", "Please fill all fields");
-      return;
-    }
-    setLoading(true);
-    try {
-      await register({ name, email, password, role });
-    } catch (error: any) {
-      shakeBtn();
-      Alert.alert(
-        "Registration Failed",
-        error.response?.data?.message || "Something went wrong"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    
+    // agar child hai to kuch nahi karna — app khud home pe le jayega
+  } catch (error: any) {
+    shakeBtn();
+    Alert.alert(
+      "Registration Failed",
+      error.response?.data?.message || "Something went wrong"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const iconColor = (field: string) => (focused === field ? ACCENT : "#aaa");
 
@@ -517,7 +519,7 @@ const styles = StyleSheet.create({
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 0,
     marginBottom: 24,
   },
   logoIcon: {
@@ -529,6 +531,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logoText: {
+    marginLeft:-18,
     color: "#fff",
     fontSize: 20,
     fontWeight: "600",

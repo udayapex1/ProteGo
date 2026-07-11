@@ -17,7 +17,7 @@ import ThemeToggle from '../../components/ThemeToggle';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const { theme } = useAppTheme();
   const [twoFactorEnabled,     setTwoFactorEnabled]     = useState(true);
@@ -155,7 +155,10 @@ export default function ProfileScreen() {
         {/* ── Family ── */}
         <Text style={sectionTitleStyle}>Family</Text>
 
-        <TouchableOpacity style={rowCardStyle} activeOpacity={0.7}>
+        <TouchableOpacity
+         style={rowCardStyle} activeOpacity={0.7}
+          onPress={() => navigation.navigate('PairedAccount')}
+         >
           <View style={[styles.rowIcon, { backgroundColor: theme.colors.successLight }]}>
             <Ionicons name="link-outline" size={17} color={theme.colors.success} />
           </View>
