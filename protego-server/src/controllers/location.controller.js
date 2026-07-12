@@ -46,29 +46,53 @@ const locationController = {
     }
   },
 
-  getHistory: async (req, res) => {
-    try {
-      const targetUserId = req.params.userId;
-      
-      // SECURITY GUARD: Verify direct authorization link
-      const requester = await pairingRepository.findById(req.user.userId);
-      if (!requester || requester.pairedWith?.toString() !== targetUserId) {
-        return res.status(403).json({ message: "Access Denied: You are not paired with this device." });
-      }
+   getHistory: async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
 
-      // DATA TYPE CASTING FIX: Sanitize query string inputs safely to integers
-      const hours = req.query.hours ? parseInt(req.query.hours, 10) : 24;
-      if (isNaN(hours)) {
-        return res.status(400).json({ message: "Query parameter 'hours' must be a valid integer." });
-      }
+    // Fetch requester
+    const requester = await pairingRepository.findById(req.user.userId);
 
-      const result = await locationService.getHistory(targetUserId, hours);
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error("Error in getHistory:", error.message);
-      return res.status(500).json({ message: "Internal server error fetching route history." });
+    if (!requester) {
+      return res.status(404).json({ message: "User not found." });
     }
-  },
+
+    // Authorization
+    const isSelf = req.user.userId === targetUserId;
+    const isPairedParent =
+      requester.pairedWith?.toString() === targetUserId;
+
+    if (!isSelf && !isPairedParent) {
+      return res.status(403).json({
+        message: "Access Denied",
+      });
+    }
+
+    // Parse hours query
+    const hours = req.query.hours
+      ? parseInt(req.query.hours, 10)
+      : 24;
+
+    if (isNaN(hours)) {
+      return res.status(400).json({
+        message: "Query parameter 'hours' must be a valid integer.",
+      });
+    }
+
+    // Fetch location history
+    const result = await locationService.getHistory(
+      targetUserId,
+      hours
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in getHistory:", error);
+    return res.status(500).json({
+      message: "Internal server error fetching route history.",
+    });
+  }
+},
 
   getSOSLocations: async (req, res) => {
     try {

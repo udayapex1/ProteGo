@@ -6,6 +6,9 @@ import * as Network from 'expo-network';
 
 export const LOCATION_TASK_NAME = 'protego-background-location-task';
 
+// module-level guard — persists as long as the JS engine instance is alive
+let lastSentTimestamp: number | null = null;
+
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     if (error) {
         console.log('❌ Background location task error:', error);
@@ -17,6 +20,13 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
         const location = locations[0];
 
         if (location) {
+            // Skip if we already sent this exact GPS timestamp
+            if (lastSentTimestamp === location.timestamp) {
+                console.log('⏭️ Duplicate location fix skipped:', location.timestamp);
+                return;
+            }
+            lastSentTimestamp = location.timestamp;
+
             try {
                 const batteryLevel = await Battery.getBatteryLevelAsync();
                 const networkState = await Network.getNetworkStateAsync();

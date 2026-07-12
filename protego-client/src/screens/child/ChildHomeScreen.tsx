@@ -7,7 +7,9 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Linking
 } from 'react-native';
+import * as Battery from 'expo-battery';
 import MapView, { Marker, Circle, Polyline } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +22,7 @@ import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
 import { locationApi } from '../../api/location.api';
 import { geofenceApi } from '../../api/geofence.api';
 import { Geofence } from '../../types/location.types';
+
 import {
   startBackgroundLocationTracking,
 } from '../../services/locationTracking.service';
@@ -45,6 +48,25 @@ export default function ChildHomeScreen() {
   const mapRef = useRef<MapView>(null);
   const fullscreenMapRef = useRef<MapView>(null);
   const watchSubscription = useRef<Location.LocationSubscription | null>(null);
+  const [lowBattery, setLowBattery] = useState(false);
+
+
+
+  useEffect(() => {
+    const checkBattery = async () => {
+      const level = await Battery.getBatteryLevelAsync();
+      setLowBattery(level <= 0.25); // 25% se neeche
+    };
+    checkBattery();
+
+    const subscription = Battery.addBatteryLevelListener(({ batteryLevel }) => {
+      setLowBattery(batteryLevel <= 0.25);
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+
 
   useEffect(() => {
     initTracking();
@@ -58,7 +80,7 @@ export default function ChildHomeScreen() {
   }, []);
 
   const initTracking = async () => {
-    // Foreground live update for the map UI itself
+
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status === 'granted') {
       watchSubscription.current = await Location.watchPositionAsync(
@@ -157,6 +179,20 @@ export default function ChildHomeScreen() {
         </View>
       </View>
 
+
+      {lowBattery && (
+        <TouchableOpacity
+          style={[styles.batteryBanner, { backgroundColor: theme.colors.dangerLight }]}
+          onPress={() => Linking.openSettings()}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="battery-dead-outline" size={16} color={theme.colors.danger} />
+          <Text style={[styles.batteryBannerText, { color: theme.colors.danger }]}>
+            Low battery may pause tracking. Tap to check settings.
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={theme.colors.danger} />
+        </TouchableOpacity>
+      )}
       <View style={styles.mapCard}>
         {myLocation ? (
           <MapView
@@ -226,7 +262,7 @@ export default function ChildHomeScreen() {
         {myLocation && (
           <>
             <View style={styles.mapOverlay} pointerEvents="none" />
-            
+
             <TouchableOpacity
               style={styles.fullscreenBtn}
               onPress={() => setIsMapFullscreen(true)}
@@ -326,7 +362,7 @@ export default function ChildHomeScreen() {
             >
               <Ionicons name="close" size={20} color="#fff" />
             </TouchableOpacity>
-            
+
             {route && (
               <View style={styles.routeChip}>
                 <Ionicons name="navigate-outline" size={12} color="#fff" />
@@ -389,6 +425,21 @@ export default function ChildHomeScreen() {
 }
 
 const styles = StyleSheet.create({
+
+  batteryBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: spacing.xl,
+    marginBottom: spacing.md,
+    padding: 12,
+    borderRadius: radius.lg,
+  },
+  batteryBannerText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    flex: 1,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -602,11 +653,11 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: fontSize.sm,
   },
-sosWrap: {
-  marginTop: 'auto',
-  marginHorizontal: spacing.xl,
-  marginBottom: 90, // navbar height (60) + margin (10) + extra buffer
-},
+  sosWrap: {
+    marginTop: 'auto',
+    marginHorizontal: spacing.xl,
+    marginBottom: 90, // navbar height (60) + margin (10) + extra buffer
+  },
   sosBtn: {
     backgroundColor: colors.danger,
     borderRadius: radius.pill,

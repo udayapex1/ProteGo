@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import ChildProfileScreen from '../screens/child/ChildProfileScreen';
 import PairedAccountScreen from '../screens/common/PairedAccountScreen';
+import BatteryOptimizationScreen from '../screens/child/BatteryOptimizationScreen';
 
 export type ProfileStackParamList = {
   ProfileMain: undefined;
@@ -15,6 +16,7 @@ export default function ChildProfileStackNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={ChildProfileScreen} />
       <Stack.Screen name="PairedAccount" component={PairedAccountScreen} />
+      <Stack.Screen name="BatteryOptimization" component={BatteryOptimizationScreen} />
     </Stack.Navigator>
   );
 }

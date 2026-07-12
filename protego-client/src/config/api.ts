@@ -1,4 +1,5 @@
-const SERVER_URL = 'http://10.13.182.50:8000';
+
+const SERVER_URL = 'http://10.118.97.50:8000';
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, '');
 
