@@ -98,7 +98,12 @@ export default function ParentHomeScreen() {
 
       socketInstance.on('location:update', (data: any) => {
         hasReceivedSocketUpdate.current = true;
-        console.log('📍 Live update received:', data);
+        console.log('📥 Parent received child telemetry:', {
+          userId: data.userId,
+          battery: data.battery,
+          network: data.network,
+          timestamp: data.timestamp,
+        });
         setLiveLocation({
           latitude: data.latitude,
           longitude: data.longitude,
@@ -112,6 +117,14 @@ export default function ParentHomeScreen() {
         console.log('🚧 Geofence breach:', data);
         loadInitialData();
       });
+
+      socketInstance.on('sos:alert', (data: any) => {
+        console.log('🚨 Parent received SOS alert:', {
+          userId: data.userId,
+          battery: data.battery,
+          timestamp: data.timestamp,
+        });
+      });
     };
 
     watchParentLocation();
@@ -121,6 +134,7 @@ export default function ParentHomeScreen() {
       if (socketInstance) {
         socketInstance.off('location:update');
         socketInstance.off('geofence:breach');
+        socketInstance.off('sos:alert');
       }
       if (parentLocationSubscription) {
         parentLocationSubscription.remove();
@@ -142,6 +156,14 @@ export default function ParentHomeScreen() {
         }
       );
       hasFitMap.current = true;
+    }
+  }, [parentLocation, liveLocation]);
+
+  const hasAutoFetchedRoute = useRef(false);
+  useEffect(() => {
+    if (parentLocation && liveLocation && !hasAutoFetchedRoute.current && !routeLoading) {
+      hasAutoFetchedRoute.current = true;
+      handleShowRoute();
     }
   }, [parentLocation, liveLocation]);
 
@@ -168,6 +190,11 @@ export default function ParentHomeScreen() {
 
         // Sirf set karo agar Socket se abhi tak kuch nahi aaya
         if (latest && !hasReceivedSocketUpdate.current) {
+          console.log('📥 Parent loaded latest child telemetry:', {
+            battery: latest.battery,
+            network: latest.network,
+            timestamp: latest.createdAt ?? latest.timestamp,
+          });
           setLiveLocation({
             latitude: latest.location?.coordinates?.[1] ?? latest.latitude,
             longitude: latest.location?.coordinates?.[0] ?? latest.longitude,
@@ -270,21 +297,11 @@ export default function ParentHomeScreen() {
                 </Marker>
               )}
 
-              {route ? (
+              {route && (
                 <Polyline
                   coordinates={route.coordinates}
                   strokeColor={colors.primary}
                   strokeWidth={4}
-                />
-              ) : parentLocation && (
-                <Polyline
-                  coordinates={[
-                    { latitude: parentLocation.latitude, longitude: parentLocation.longitude },
-                    { latitude: liveLocation.latitude, longitude: liveLocation.longitude },
-                  ]}
-                  strokeColor={colors.primary}
-                  strokeWidth={2.5}
-                  geodesic
                 />
               )}
 
@@ -408,20 +425,8 @@ export default function ParentHomeScreen() {
                   </Marker>
                 )}
 
-                {route ? (
+                {route && (
                   <Polyline coordinates={route.coordinates} strokeColor={colors.primary} strokeWidth={4} />
-                ) : (
-                  parentLocation && (
-                    <Polyline
-                      coordinates={[
-                        { latitude: parentLocation.latitude, longitude: parentLocation.longitude },
-                        { latitude: liveLocation.latitude, longitude: liveLocation.longitude },
-                      ]}
-                      strokeColor={colors.primary}
-                      strokeWidth={2.5}
-                      geodesic
-                    />
-                  )
                 )}
 
                 {zones.map((zone) => (

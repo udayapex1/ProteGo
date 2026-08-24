@@ -6,9 +6,10 @@ const locationController = {
   updateLocation: async (req, res) => {
     try {
       const result = await locationService.updateLocation(req.user.userId, req.body);
+      console.log('📤 Telemetry response sent:', { id: result._id.toString(), battery: result.battery, isSOS: result.isSOS });
       return res.status(200).json(result);
     } catch (error) {
-      console.error(" Error in updateLocation:", error.message);
+      console.error('❌ Error in updateLocation:', { userId: req.user?.userId, message: error.message, body: req.body });
       return res.status(500).json({ message: "Internal server error updating telemetry." });
     }
   },
@@ -31,10 +32,13 @@ const locationController = {
   getLatest: async (req, res) => {
     try {
       const targetUserId = req.params.userId;
-      
-      // SECURITY GUARD: Verify the requester is authorized to track this specific device
+      const isSelf = req.user.userId === targetUserId;
+
+      // SECURITY GUARD: Verify the requester is authorized to track this device (self or paired)
       const requester = await pairingRepository.findById(req.user.userId);
-      if (!requester || requester.pairedWith?.toString() !== targetUserId) {
+      const isPaired = requester && requester.pairedWith?.toString() === targetUserId;
+
+      if (!isSelf && !isPaired) {
         return res.status(403).json({ message: "Access Denied: You are not paired with this device." });
       }
 
@@ -97,10 +101,13 @@ const locationController = {
   getSOSLocations: async (req, res) => {
     try {
       const targetUserId = req.params.userId;
-      
-      // SECURITY GUARD: Verify direct authorization link
+      const isSelf = req.user.userId === targetUserId;
+
+      // SECURITY GUARD: Verify direct authorization link (self or paired)
       const requester = await pairingRepository.findById(req.user.userId);
-      if (!requester || requester.pairedWith?.toString() !== targetUserId) {
+      const isPaired = requester && requester.pairedWith?.toString() === targetUserId;
+
+      if (!isSelf && !isPaired) {
         return res.status(403).json({ message: "Access Denied: You are not paired with this device." });
       }
 

@@ -6,11 +6,12 @@
 
 import Constants from 'expo-constants';
 
-// Pull from app config / env — NEVER hardcode the key in source.
-// Add to app.json/app.config.js under "extra": { orsApiKey: process.env.ORS_API_KEY }
-   const ORS_API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjY0NDVjNzA5Mzg2ZDQ1OGJhNTRkMjUyMjQ2YTJjNzZjIiwiaCI6Im11cm11cjY0In0=';
+// Pull from env — NEVER hardcode sensitive keys in production source.
+const ORS_API_KEY =
+  process.env.EXPO_PUBLIC_ORS_API_KEY ||
+  'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjY0NDVjNzA5Mzg2ZDQ1OGJhNTRkMjUyMjQ2YTJjNzZjIiwiaCI6Im11cm11cjY0In0=';
 
-interface RouteResult {
+export interface RouteResult {
   coordinates: { latitude: number; longitude: number }[];
   distanceText: string;
   durationText: string;
@@ -80,6 +81,64 @@ export async function getWalkingOrDrivingRoute(
     };
   } catch (error) {
     console.log('Failed to fetch OpenRouteService directions:', error);
+    return null;
+  }
+}
+
+export async function getMultiPointRoute(
+  points: { latitude: number; longitude: number }[],
+  mode: 'driving' | 'walking' = 'driving'
+): Promise<RouteResult | null> {
+  if (!ORS_API_KEY || points.length < 2) return null;
+
+  try {
+    const profile = mode === 'walking' ? 'foot-walking' : 'driving-car';
+    const url = `https://api.openrouteservice.org/v2/directions/${profile}/geojson`;
+    
+    // ORS usually limits to 50 waypoints on free tier
+    const limitedPoints = points.slice(0, 50);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: ORS_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        coordinates: limitedPoints.map(p => [p.longitude, p.latitude]),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.features?.length) {
+      console.log('OpenRouteService multi-point error:', data.error?.message ?? data);
+      return null;
+    }
+
+    const feature = data.features[0];
+    const summary = feature.properties.summary;
+
+    const coordinates = feature.geometry.coordinates.map(
+      ([lng, lat]: [number, number]) => ({ latitude: lat, longitude: lng })
+    );
+
+    const distanceKm = summary.distance / 1000;
+    const distanceText =
+      distanceKm < 1 ? `${Math.round(summary.distance)} m` : `${distanceKm.toFixed(1)} km`;
+
+    const durationMin = summary.duration / 60;
+    const durationText = durationMin < 1 ? '<1 min' : `${Math.round(durationMin)} min`;
+
+    return {
+      coordinates,
+      distanceText,
+      durationText,
+      distanceMeters: summary.distance,
+      durationSeconds: summary.duration,
+    };
+  } catch (error) {
+    console.log('Failed to fetch OpenRouteService multi-point directions:', error);
     return null;
   }
 }

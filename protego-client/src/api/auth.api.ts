@@ -88,4 +88,9 @@ export const authApi = {
     const { data } = await apiClient.post('/auth/2fa/enable', { token });
     return data;
   },
+
+  disableTwoFactor: async () => {
+    const { data } = await apiClient.post('/auth/2fa/disable');
+    return data;
+  },
 };

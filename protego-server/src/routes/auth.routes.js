@@ -13,5 +13,6 @@ router.post('/refresh', authControllers.refresh);
 router.post('/logout', authMiddleware, authControllers.logout);
 router.post('/2fa/setup', authMiddleware, authControllers.setupTwoFactor);
 router.post('/2fa/enable', authMiddleware, authControllers.enableTwoFactor);
+router.post('/2fa/disable', authMiddleware, authControllers.disableTwoFactor);
 
 export default router;

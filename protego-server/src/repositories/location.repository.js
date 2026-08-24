@@ -3,25 +3,25 @@ import redisClient from "../config/redis.js";
 const locationRepository = {
   save: async (data) => {
     const location = new Location(data);
-    return await location.save();
-  },
-  save: async (data) => {
-    const location = new Location(data);
     const saved = await location.save();
 
-    // Redis mein cache — 5 min TTL
-    await redisClient.setEx(
-      `location:${data.userId}`,
-      300,
-      JSON.stringify({
-        latitude: data.location.coordinates[1],
-        longitude: data.location.coordinates[0],
-        battery: data.battery,
-        network: data.network,
-        isSOS: data.isSOS,
-        timestamp: data.createdAt,
-      }),
-    );
+    // Redis caching — 5 min TTL
+    try {
+      await redisClient.setEx(
+        `location:${data.userId}`,
+        300,
+        JSON.stringify({
+          latitude: data.location.coordinates[1],
+          longitude: data.location.coordinates[0],
+          battery: data.battery,
+          network: data.network,
+          isSOS: data.isSOS,
+          timestamp: data.createdAt,
+        })
+      );
+    } catch (err) {
+      console.warn("⚠️ Failed to set location in Redis cache:", err.message);
+    }
 
     return saved;
   },
@@ -29,16 +29,37 @@ const locationRepository = {
   saveBatch: async (locations) => {
     return await Location.insertMany(locations);
   },
-  getLatest: async (userId) => {
-    const cached = await redisClient.get(`location:${userId}`);
-    if (cached) return JSON.parse(cached);
-
-    return await Location.findOne({ userId }).sort({ createdAt: -1 }).lean();
-  },
 
   getLatest: async (userId) => {
-    return await Location.findOne({ userId }).sort({ createdAt: -1 }).lean(); // Bypasses Mongoose heavy hydration for a 5x faster read
+    try {
+      const cached = await redisClient.get(`location:${userId}`);
+      if (cached) return JSON.parse(cached);
+    } catch (err) {
+      console.warn("⚠️ Failed to read location from Redis cache:", err.message);
+    }
+
+    const latest = await Location.findOne({ userId }).sort({ createdAt: -1 }).lean();
+    if (latest) {
+      try {
+        await redisClient.setEx(
+          `location:${userId}`,
+          300,
+          JSON.stringify({
+            latitude: latest.location.coordinates[1],
+            longitude: latest.location.coordinates[0],
+            battery: latest.battery,
+            network: latest.network,
+            isSOS: latest.isSOS,
+            timestamp: latest.createdAt,
+          })
+        );
+      } catch (err) {
+        console.warn("⚠️ Failed to update location Redis cache:", err.message);
+      }
+    }
+    return latest;
   },
+
 
   // Limits query parameters cleanly to your maximum 7-day capability limit
   getHistory: async (userId, hours = 24) => {

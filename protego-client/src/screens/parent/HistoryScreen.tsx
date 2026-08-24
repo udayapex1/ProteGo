@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
 import { locationApi } from '../../api/location.api';
+import { getMultiPointRoute } from '../../api/directions.api';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -90,6 +91,7 @@ export default function HistoryScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [points, setPoints] = useState<HistoryPoint[]>([]);
+  const [routeCoords, setRouteCoords] = useState<{latitude: number; longitude: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
@@ -128,6 +130,13 @@ export default function HistoryScreen() {
       const cleaned = downsamplePoints(filtered);
       setPoints(cleaned);
 
+      if (cleaned.length >= 2) {
+        const routeResult = await getMultiPointRoute(cleaned);
+        setRouteCoords(routeResult ? routeResult.coordinates : cleaned);
+      } else {
+        setRouteCoords(cleaned);
+      }
+
       if (cleaned.length > 0 && mapRef.current) {
         setTimeout(() => {
           mapRef.current?.fitToCoordinates(cleaned, {
@@ -139,6 +148,7 @@ export default function HistoryScreen() {
     } catch (error) {
       console.log('Failed to load history:', error);
       setPoints([]);
+      setRouteCoords([]);
     } finally {
       setLoading(false);
     }
@@ -191,7 +201,7 @@ export default function HistoryScreen() {
             }}
           >
             <Polyline
-              coordinates={points}
+              coordinates={routeCoords}
               strokeColor={colors.primary}
               strokeWidth={3}
             />
@@ -283,7 +293,7 @@ export default function HistoryScreen() {
                 });
               }}
             >
-              <Polyline coordinates={points} strokeColor={colors.primary} strokeWidth={3} />
+              <Polyline coordinates={routeCoords} strokeColor={colors.primary} strokeWidth={3} />
               {points.map((point, index) => {
                 const isFirst = index === 0;
                 const isLast = index === points.length - 1;

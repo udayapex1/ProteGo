@@ -77,7 +77,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View style={styles.logoRow}>
             {/* <View style={styles.logoIcon}> */}
             <Image
-              source={{ uri: 'https://res.cloudinary.com/dwemivxbp/image/upload/v1783400959/Protego_logo_uni_l3zaze.png' }}
+              source={require('../../../assets/protego-logo.png')}
               style={{ width: 80, height: 80, borderRadius: 12 }}
               contentFit="contain"
             />

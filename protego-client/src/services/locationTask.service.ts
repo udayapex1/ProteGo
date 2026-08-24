@@ -9,6 +9,19 @@ export const LOCATION_TASK_NAME = 'protego-background-location-task';
 // module-level guard — persists as long as the JS engine instance is alive
 let lastSentTimestamp: number | null = null;
 
+const getBatteryPercentage = async (): Promise<number> => {
+    const level = await Battery.getBatteryLevelAsync();
+
+    // Expo returns -1 when the platform cannot provide a battery level. Do not
+    // send that value to the API because the server correctly only accepts 0–100.
+    if (!Number.isFinite(level) || level < 0 || level > 1) {
+        console.warn('⚠️ Battery level unavailable; sending 0% as the safe telemetry fallback.', { level });
+        return 0;
+    }
+
+    return Math.round(level * 100);
+};
+
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     if (error) {
         console.log('❌ Background location task error:', error);
@@ -28,19 +41,31 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
             lastSentTimestamp = location.timestamp;
 
             try {
-                const batteryLevel = await Battery.getBatteryLevelAsync();
+                const battery = await getBatteryPercentage();
                 const networkState = await Network.getNetworkStateAsync();
 
-                await locationApi.updateLocation({
+                console.log('📤 Child telemetry sending:', {
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
-                    battery: Math.round(batteryLevel * 100),
+                    battery,
+                    network: networkState.isConnected ? 'online' : 'offline',
+                    timestamp: new Date(location.timestamp).toISOString(),
+                });
+
+                const savedLocation = await locationApi.updateLocation({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                    battery,
                     network: networkState.isConnected ? 'online' : 'offline',
                     isSOS: false,
                     timestamp: new Date(location.timestamp).toISOString(),
                 });
 
-                console.log('📍 Background location sent:', location.coords);
+                console.log('✅ Child telemetry accepted by server:', {
+                    id: savedLocation?._id,
+                    battery: savedLocation?.battery,
+                    timestamp: savedLocation?.createdAt,
+                });
             } catch (err) {
                 console.log('❌ Failed to send background location:', err);
             }

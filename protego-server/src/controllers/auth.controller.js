@@ -63,6 +63,15 @@ const authControllers = {
     }
   },
 
+  disableTwoFactor: async (req, res) => {
+    try {
+      await authService.disableTwoFactor(req.user.userId);
+      res.status(200).json({ message: '2FA disabled successfully' });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
   forgotPassword: async (req, res) => {
     try {
       await authService.forgotPassword(req.body.email);

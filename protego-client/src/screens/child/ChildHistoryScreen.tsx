@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
 import { locationApi } from '../../api/location.api';
+import { getMultiPointRoute } from '../../api/directions.api';
 import { spacing, radius, fontSize } from '../../constants/theme';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -121,6 +122,7 @@ export default function ChildHistoryScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [points, setPoints] = useState<HistoryPoint[]>([]);
+  const [routeCoords, setRouteCoords] = useState<{latitude: number; longitude: number}[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
   const [fullscreenVisible, setFullscreenVisible] = useState(false);
@@ -160,6 +162,13 @@ export default function ChildHistoryScreen() {
       const cleaned = downsamplePoints(filtered);
       setPoints(cleaned);
 
+      if (cleaned.length >= 2) {
+        const routeResult = await getMultiPointRoute(cleaned, 'walking');
+        setRouteCoords(routeResult ? routeResult.coordinates : cleaned);
+      } else {
+        setRouteCoords(cleaned);
+      }
+
       if (cleaned.length > 0) {
         setTimeout(() => {
           mapRef.current?.fitToCoordinates(cleaned, {
@@ -171,6 +180,7 @@ export default function ChildHistoryScreen() {
     } catch (error) {
       console.log('Failed to load child history:', error);
       setPoints([]);
+      setRouteCoords([]);
     } finally {
       setLoading(false);
     }
@@ -195,7 +205,7 @@ export default function ChildHistoryScreen() {
 
   const renderMapMarkers = () => (
     <>
-      <Polyline coordinates={points} strokeColor={theme.colors.primary} strokeWidth={3} />
+      <Polyline coordinates={routeCoords} strokeColor={theme.colors.primary} strokeWidth={3} />
       {points.map((point, index) => {
         const isFirst = index === 0;
         const isLast = index === points.length - 1;

@@ -110,6 +110,13 @@ const authService = {
     await userRepository.updateById(userId, { isTwoFactorEnabled: true });
   },
 
+  disableTwoFactor: async (userId) => {
+    await userRepository.updateById(userId, {
+      twoFactorSecret: null,
+      isTwoFactorEnabled: false,
+    });
+  },
+
   forgotPassword: async (email) => {
     if (!email) throw new Error("Email is required");
 

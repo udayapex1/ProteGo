@@ -116,16 +116,34 @@ export default function ChildHomeScreen() {
 
     setSosTriggering(true);
     try {
-      await locationApi.updateLocation({
+      const batteryLevel = await Battery.getBatteryLevelAsync();
+      const battery = Number.isFinite(batteryLevel) && batteryLevel >= 0 && batteryLevel <= 1
+        ? Math.round(batteryLevel * 100)
+        : 0;
+
+      if (!Number.isFinite(batteryLevel) || batteryLevel < 0 || batteryLevel > 1) {
+        console.warn('⚠️ SOS battery level unavailable; using 0% fallback.', { batteryLevel });
+      }
+
+      console.log('🚨 SOS sending:', {
         latitude: myLocation.latitude,
         longitude: myLocation.longitude,
-        battery: 100, // ideally pull real battery here too
+        battery,
+        timestamp: new Date().toISOString(),
+      });
+
+      const result = await locationApi.updateLocation({
+        latitude: myLocation.latitude,
+        longitude: myLocation.longitude,
+        battery,
         network: 'online',
         isSOS: true,
         timestamp: new Date().toISOString(),
       });
+      console.log('✅ SOS accepted by server:', { id: result?._id, battery: result?.battery });
       Alert.alert('SOS Sent', 'Your parent has been notified of your emergency.');
     } catch (error) {
+      console.error('❌ SOS request failed:', error);
       Alert.alert('Error', 'Failed to send SOS. Please try again.');
     } finally {
       setSosTriggering(false);
