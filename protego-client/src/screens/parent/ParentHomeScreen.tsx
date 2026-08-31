@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.xl,
     backgroundColor: '#1A1A1A',
     borderRadius: radius.xxl,
-    height: 280,
+    height: 380,
     overflow: 'hidden',
     position: 'relative',
   },

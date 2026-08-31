@@ -15,6 +15,7 @@ import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { userApi } from '../../api/user.api';
+import { biometricService } from '../../services/biometric.service';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -23,6 +24,7 @@ export default function ProfileScreen({ navigation }: any) {
   const { theme } = useAppTheme();
   const [twoFactorEnabled,     setTwoFactorEnabled]     = useState(true);
   const [biometricEnabled,     setBiometricEnabled]     = useState(false);
+  const [biometricBusy,        setBiometricBusy]        = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleLogout = () => {
@@ -30,6 +32,37 @@ export default function ProfileScreen({ navigation }: any) {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log out', style: 'destructive', onPress: logout },
     ]);
+  };
+
+  React.useEffect(() => {
+    if (!user?.id || user.role !== 'parent') return;
+    biometricService.isEnabled(user.id).then(setBiometricEnabled).catch(() => undefined);
+  }, [user?.id, user?.role]);
+
+  const handleBiometricToggle = async () => {
+    if (!user?.id || biometricBusy) return;
+    setBiometricBusy(true);
+    try {
+      if (biometricEnabled) {
+        await biometricService.setEnabled(user.id, false);
+        setBiometricEnabled(false);
+        return;
+      }
+
+      if (!(await biometricService.isAvailable())) {
+        Alert.alert('Biometrics unavailable', 'Set up fingerprint or Face ID on this device before enabling biometric login.');
+        return;
+      }
+
+      if (await biometricService.authenticate()) {
+        await biometricService.setEnabled(user.id, true);
+        setBiometricEnabled(true);
+      }
+    } catch {
+      Alert.alert('Biometric setup failed', 'Unable to update biometric login on this device.');
+    } finally {
+      setBiometricBusy(false);
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -160,7 +193,8 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
           <TouchableOpacity
             style={[styles.toggle, biometricEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
-            onPress={() => setBiometricEnabled(!biometricEnabled)}
+            onPress={handleBiometricToggle}
+            disabled={biometricBusy}
             activeOpacity={0.8}
           >
             <View style={[styles.toggleDot, { backgroundColor: theme.colors.surface }]} />
