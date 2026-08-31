@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -13,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { pairingApi } from '../../api/pairing.api';
 import ThemeToggle from '../../components/ThemeToggle';
 
@@ -22,6 +22,7 @@ const CODE_LENGTH = 6;
 export default function JoinPairingScreen() {
   const { theme } = useAppTheme();
   const { setPairedWith } = useAuth();
+  const { alert } = useAppAlert();
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [loading, setLoading] = useState(false);
   const inputsRef = useRef<Array<TextInput | null>>([]);
@@ -56,7 +57,7 @@ export default function JoinPairingScreen() {
   const handleJoin = async () => {
     const code = digits.join('');
     if (code.length !== CODE_LENGTH) {
-      Alert.alert('Error', 'Please enter the full 6-digit code');
+      alert('Error', 'Please enter the full 6-digit code');
       return;
     }
     setLoading(true);
@@ -69,7 +70,7 @@ export default function JoinPairingScreen() {
       await setPairedWith(paired.id);
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Something went wrong';
-      Alert.alert('Pairing Failed', message);
+      alert('Pairing Failed', message);
       setDigits(Array(CODE_LENGTH).fill(''));
       inputsRef.current[0]?.focus();
     } finally {

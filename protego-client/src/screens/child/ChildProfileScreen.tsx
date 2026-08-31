@@ -6,11 +6,11 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -20,6 +20,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default function ChildProfileScreen({ navigation }: any) {
   const { user, logout } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -27,21 +28,21 @@ export default function ChildProfileScreen({ navigation }: any) {
   const [shareLocationEnabled, setShareLocationEnabled] = useState(true);
 
   const handleLogout = () => {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
+    alert('Log out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log out', style: 'destructive', onPress: logout },
     ]);
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert('Delete account', 'This permanently deletes your account and cannot be undone.', [
+    alert('Delete account', 'This permanently deletes your account and cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
         try {
           await userApi.deleteAccount();
           await logout();
         } catch (error: any) {
-          Alert.alert('Delete failed', error.response?.data?.message || 'Unable to delete your account.');
+          alert('Delete failed', error.response?.data?.message || 'Unable to delete your account.');
         }
       } },
     ]);

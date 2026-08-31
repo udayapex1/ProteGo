@@ -5,16 +5,16 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Home, Map, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { geofenceApi } from '../../api/geofence.api';
 import { Geofence } from '../../types/location.types';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
+import { useAppAlert } from '../../context/AlertContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { ZonesStackParamList } from '../../navigation/ZonesStackNavigator';
 
@@ -22,6 +22,7 @@ type NavProp = StackNavigationProp<ZonesStackParamList, 'ZonesList'>;
 
 export default function ZonesScreen() {
   const { theme } = useAppTheme();
+  const { alert } = useAppAlert();
   const navigation = useNavigation<NavProp>();
   const [zones, setZones] = useState<Geofence[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ export default function ZonesScreen() {
   );
 
   const handleDelete = (zone: Geofence) => {
-    Alert.alert(
+    alert(
       'Delete zone',
       `Are you sure you want to delete "${zone.name}"?`,
       [
@@ -58,7 +59,7 @@ export default function ZonesScreen() {
               await geofenceApi.deactivate(zone._id);
               setZones((prev) => prev.filter((z) => z._id !== zone._id));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete zone');
+              alert('Error', 'Failed to delete zone');
             }
           },
         },
@@ -76,7 +77,7 @@ export default function ZonesScreen() {
             style={[styles.addBtn, { backgroundColor: theme.colors.primary }]}
             onPress={() => navigation.navigate('CreateZone', undefined)}
           >
-            <Ionicons name="add" size={18} color="#fff" />
+            <Plus size={18} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -85,7 +86,7 @@ export default function ZonesScreen() {
         {zones.length === 0 && !loading ? (
           <View style={styles.emptyState}>
             <View style={[styles.emptyIcon, { backgroundColor: theme.colors.primaryLight }]}>
-              <Ionicons name="map-outline" size={26} color={theme.colors.primary} />
+              <Map size={26} color={theme.colors.primary} />
             </View>
             <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>No zones yet</Text>
             <Text style={[styles.emptySub, { color: theme.colors.textMuted }]}>Create your first safety zone to get alerts</Text>
@@ -101,7 +102,7 @@ export default function ZonesScreen() {
             <View key={zone._id} style={[styles.zoneCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
               <View style={styles.zoneRow}>
                 <View style={[styles.zoneIcon, { backgroundColor: theme.colors.primaryLight }]}>
-                  <Ionicons name="home-outline" size={20} color={theme.colors.primary} />
+                  <Home size={20} color={theme.colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.zoneName, { color: theme.colors.text }]}>{zone.name}</Text>
@@ -116,14 +117,14 @@ export default function ZonesScreen() {
                     navigation.navigate('CreateZone', { zoneId: zone._id })
                   }
                 >
-                  <Ionicons name="create-outline" size={14} color={theme.colors.textMuted} />
+                  <Pencil size={14} color={theme.colors.textMuted} />
                   <Text style={[styles.actionText, { color: theme.colors.textMuted }]}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.actionBtn, { borderColor: theme.colors.border }]}
                   onPress={() => handleDelete(zone)}
                 >
-                  <Ionicons name="trash-outline" size={14} color={theme.colors.danger} />
+                  <Trash2 size={14} color={theme.colors.danger} />
                   <Text style={[styles.actionText, { color: theme.colors.danger }]}>Delete</Text>
                 </TouchableOpacity>
               </View>

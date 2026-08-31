@@ -12,8 +12,9 @@ import {
   Modal,
 } from 'react-native';
 import MapView, { Marker, Circle, Polyline } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
+import { BatteryMedium, CircleUserRound, Expand, Home, Map, MapPin, Navigation, Wifi, X } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { childApi } from '../../api/child.api';
 import { Geofence } from '../../types/location.types';
@@ -39,6 +40,7 @@ const formatDistance = (meters: number): string => {
 
 export default function ParentHomeScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [liveLocation, setLiveLocation] = useState<LiveLocation | null>(null);
   const [zones, setZones] = useState<Geofence[]>([]);
@@ -258,6 +260,9 @@ export default function ParentHomeScreen({ navigation }: any) {
           animated: true,
         });
       }
+    } catch (error) {
+      console.log('Failed to load route:', error);
+      alert('Route unavailable', 'We could not calculate a route right now. Please try again.');
     } finally {
       setRouteLoading(false);
     }
@@ -299,7 +304,7 @@ export default function ParentHomeScreen({ navigation }: any) {
               {parentLocation && (
                 <Marker coordinate={parentLocation}>
                   <View style={styles.parentMarkerOuter}>
-                    <Ionicons name="person" size={14} color="#fff" />
+                    <CircleUserRound size={14} color="#fff" />
                   </View>
                 </Marker>
               )}
@@ -328,7 +333,7 @@ export default function ParentHomeScreen({ navigation }: any) {
             </MapView>
           ) : (
             <View style={styles.mapPlaceholder}>
-              <Ionicons name="location-outline" size={28} color="#555" />
+              <MapPin size={28} color="#555" />
               <Text style={styles.mapPlaceholderText}>
                 {loading ? 'Loading location...' : 'No location data yet'}
               </Text>
@@ -342,7 +347,7 @@ export default function ParentHomeScreen({ navigation }: any) {
             onPress={() => setIsMapFullscreen(true)}
             disabled={!liveLocation}
           >
-            <Ionicons name="expand-outline" size={16} color="#fff" />
+            <Expand size={16} color="#fff" />
           </TouchableOpacity>
 
           <View style={styles.mapBottom}>
@@ -370,7 +375,7 @@ export default function ParentHomeScreen({ navigation }: any) {
                 {routeLoading ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Ionicons name="navigate-outline" size={12} color="#fff" />
+                  <Navigation size={12} color="#fff" />
                 )}
                 <Text style={styles.routeChipText}>
                   {route ? `${route.distanceText} · ${route.durationText}` : 'Show route'}
@@ -427,7 +432,7 @@ export default function ParentHomeScreen({ navigation }: any) {
                 {parentLocation && (
                   <Marker coordinate={parentLocation}>
                     <View style={styles.parentMarkerOuter}>
-                      <Ionicons name="person" size={14} color="#fff" />
+                      <CircleUserRound size={14} color="#fff" />
                     </View>
                   </Marker>
                 )}
@@ -457,7 +462,7 @@ export default function ParentHomeScreen({ navigation }: any) {
                 style={styles.closeFullscreenBtn}
                 onPress={() => setIsMapFullscreen(false)}
               >
-                <Ionicons name="close" size={20} color="#fff" />
+                <X size={20} color="#fff" />
               </TouchableOpacity>
 
               {liveLocation && parentLocation && (
@@ -469,7 +474,7 @@ export default function ParentHomeScreen({ navigation }: any) {
                   {routeLoading ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
-                    <Ionicons name="navigate-outline" size={12} color="#fff" />
+                    <Navigation size={12} color="#fff" />
                   )}
                   <Text style={styles.routeChipText}>
                     {route ? `${route.distanceText} · ${route.durationText}` : 'Show route'}
@@ -484,7 +489,7 @@ export default function ParentHomeScreen({ navigation }: any) {
           <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.statTop}>
               <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>Battery</Text>
-              <Ionicons name="battery-half-outline" size={16} color={colors.success} />
+              <BatteryMedium size={16} color={colors.success} />
             </View>
             <Text style={[styles.statVal, { color: theme.colors.text }]}>{liveLocation?.battery ?? '--'}%</Text>
             <View style={[styles.battTrack, { backgroundColor: theme.colors.border }]}>
@@ -495,7 +500,7 @@ export default function ParentHomeScreen({ navigation }: any) {
           <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.statTop}>
               <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>Network</Text>
-              <Ionicons name="wifi-outline" size={16} color={theme.colors.accent} />
+              <Wifi size={16} color={theme.colors.accent} />
             </View>
             <Text style={[styles.statVal, { color: theme.colors.text }]}>{liveLocation?.network === 'online' ? 'Online' : 'Offline'}</Text>
             <Text style={[styles.statSub, { color: theme.colors.textSubtle }]}>
@@ -508,7 +513,7 @@ export default function ParentHomeScreen({ navigation }: any) {
           <View style={[styles.statCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             <View style={styles.statTop}>
               <Text style={[styles.statLabel, { color: theme.colors.textMuted }]}>{route ? 'Road distance' : 'Distance'}</Text>
-              <Ionicons name="location-outline" size={16} color={colors.primary} />
+              <MapPin size={16} color={colors.primary} />
             </View>
             <Text style={[styles.statVal, { color: theme.colors.text }]}>
               {route
@@ -525,14 +530,14 @@ export default function ParentHomeScreen({ navigation }: any) {
 
         <View style={styles.sectionRow}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Active zones</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Zones')} accessibilityRole="button" accessibilityLabel="View all safety zones">
             <Text style={[styles.sectionLink, { color: theme.colors.accent }]}>See all</Text>
           </TouchableOpacity>
         </View>
 
         {zones.length === 0 ? (
           <View style={styles.emptyZones}>
-            <Ionicons name="map-outline" size={22} color={theme.colors.textSubtle} />
+            <Map size={22} color={theme.colors.textSubtle} />
             <Text style={[styles.emptyZonesText, { color: theme.colors.textSubtle }]}>No zones created yet</Text>
           </View>
         ) : (
@@ -541,7 +546,7 @@ export default function ParentHomeScreen({ navigation }: any) {
             return (
               <View key={zone._id} style={[styles.zoneCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                 <View style={[styles.zoneIcon, { backgroundColor: theme.colors.inputFocused }]}>
-                  <Ionicons name="home-outline" size={18} color={theme.colors.accent} />
+                  <Home size={18} color={theme.colors.accent} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.zoneName, { color: theme.colors.text }]}>{zone.name}</Text>

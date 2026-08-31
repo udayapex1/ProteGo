@@ -9,11 +9,11 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
@@ -31,6 +31,7 @@ const ACCENT_BORDER = 'rgba(124,58,237,0.2)';
 
 export default function LoginScreen({ navigation }: Props) {
   const { login } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +41,7 @@ export default function LoginScreen({ navigation }: Props) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill all fields');
+      alert('Error', 'Please fill all fields');
       return;
     }
     setLoading(true);
@@ -50,7 +51,7 @@ export default function LoginScreen({ navigation }: Props) {
         navigation.navigate('TwoFactor', { userId: result.userId });
       }
     } catch (error: any) {
-      Alert.alert('Login Failed', error.response?.data?.message || 'Something went wrong');
+      alert('Login Failed', error.response?.data?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

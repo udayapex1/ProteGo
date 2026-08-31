@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Moon, Sun } from 'lucide-react-native';
 import { useAppTheme } from '../context/ThemeContext';
 
 interface ThemeToggleProps {
@@ -26,11 +26,7 @@ export default function ThemeToggle({ style }: ThemeToggleProps) {
         style,
       ]}
     >
-      <Ionicons
-        name={theme.isDark ? 'sunny-outline' : 'moon-outline'}
-        size={20}
-        color={theme.colors.accent}
-      />
+      {theme.isDark ? <Sun size={20} color={theme.colors.accent} strokeWidth={1.9} /> : <Moon size={20} color={theme.colors.accent} strokeWidth={1.9} />}
     </TouchableOpacity>
   );
 }

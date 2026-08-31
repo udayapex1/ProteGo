@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAppAlert } from '../../context/AlertContext';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useAuth } from '../../context/AuthContext';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
@@ -11,13 +12,14 @@ type Props = StackScreenProps<AuthStackParamList, 'TwoFactor'>;
 
 export default function TwoFactorScreen({ route }: Props) {
   const { completeTwoFactor } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleVerify = async () => {
     if (!token) {
-      Alert.alert('Error', 'Please enter your verification code');
+      alert('Error', 'Please enter your verification code');
       return;
     }
 
@@ -25,7 +27,7 @@ export default function TwoFactorScreen({ route }: Props) {
     try {
       await completeTwoFactor(route.params.userId, token);
     } catch (error: any) {
-      Alert.alert('Verification Failed', error.response?.data?.message || 'Something went wrong');
+      alert('Verification Failed', error.response?.data?.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

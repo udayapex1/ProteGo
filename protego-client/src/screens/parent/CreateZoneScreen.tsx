@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Modal,
@@ -14,12 +13,13 @@ import MapView, { Circle } from 'react-native-maps';
 import Slider from '@react-native-community/slider';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronLeft, Expand, X, Tag } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { geofenceApi } from '../../api/geofence.api';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
+import { useAppAlert } from '../../context/AlertContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { ZonesStackParamList } from '../../navigation/ZonesStackNavigator';
 import { darkMapStyle, lightMapStyle } from '../../constants/mapStyles';
@@ -29,6 +29,7 @@ type RouteProps = RouteProp<ZonesStackParamList, 'CreateZone'>;
 
 export default function CreateZoneScreen() {
   const { theme } = useAppTheme();
+  const { alert } = useAppAlert();
   const navigation = useNavigation<NavProp>();
   const route = useRoute<RouteProps>();
   const zoneId = route.params?.zoneId;
@@ -85,7 +86,7 @@ export default function CreateZoneScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a zone name');
+      alert('Error', 'Please enter a zone name');
       return;
     }
 
@@ -106,7 +107,7 @@ export default function CreateZoneScreen() {
 
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to save zone');
+      alert('Error', error.response?.data?.message || 'Failed to save zone');
     } finally {
       setLoading(false);
     }
@@ -130,7 +131,7 @@ export default function CreateZoneScreen() {
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-            <Ionicons name="chevron-back" size={20} color={theme.colors.text} />
+            <ChevronLeft size={20} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: theme.colors.text }]}>{isEditing ? 'Edit zone' : 'New zone'}</Text>
           <ThemeToggle />
@@ -171,7 +172,7 @@ export default function CreateZoneScreen() {
             style={styles.fullscreenBtn}
             onPress={() => setIsMapFullscreen(true)}
           >
-            <Ionicons name="expand-outline" size={16} color="#fff" />
+            <Expand size={16} color="#fff" />
           </TouchableOpacity>
         </View>
 
@@ -211,7 +212,7 @@ export default function CreateZoneScreen() {
                 style={styles.closeFullscreenBtn}
                 onPress={() => setIsMapFullscreen(false)}
               >
-                <Ionicons name="close" size={20} color="#fff" />
+                <X size={20} color="#fff" />
               </TouchableOpacity>
             </SafeAreaView>
           </View>
@@ -220,7 +221,7 @@ export default function CreateZoneScreen() {
         <View style={styles.formCard}>
           <Text style={[styles.inputLabel, { color: theme.colors.text }]}>Zone name</Text>
           <View style={[styles.inputPill, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-            <Ionicons name="pricetag-outline" size={14} color={theme.colors.textSubtle} />
+            <Tag size={14} color={theme.colors.textSubtle} />
             <TextInput
               style={[styles.inputField, { color: theme.colors.text }]}
               placeholder="e.g. Home, School, Grandma's"

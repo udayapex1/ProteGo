@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAppAlert } from '../../context/AlertContext';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -10,19 +11,20 @@ type Props = { navigation: StackNavigationProp<AuthStackParamList, 'ResetPasswor
 
 export default function ResetPasswordScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
+  const { alert } = useAppAlert();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (password.length < 8) return Alert.alert('Invalid password', 'Password must be at least 8 characters.');
-    if (password !== confirm) return Alert.alert('Passwords do not match', 'Enter the same password twice.');
+    if (password.length < 8) return alert('Invalid password', 'Password must be at least 8 characters.');
+    if (password !== confirm) return alert('Passwords do not match', 'Enter the same password twice.');
     setLoading(true);
     try {
       const result = await authApi.resetPassword(route.params.token, password);
-      Alert.alert('Password updated', result.message, [{ text: 'Log in', onPress: () => navigation.navigate('Login') }]);
+      alert('Password updated', result.message, [{ text: 'Log in', onPress: () => navigation.navigate('Login') }]);
     } catch (error: any) {
-      Alert.alert('Reset failed', error.response?.data?.message || 'The reset link may be invalid or expired.');
+      alert('Reset failed', error.response?.data?.message || 'The reset link may be invalid or expired.');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AlertCircle, ArrowLeft, Map, Navigation, RefreshCw } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../context/ThemeContext';
 import { childApi } from '../../api/child.api';
@@ -45,10 +45,10 @@ export default function ChildDashboardScreen({ navigation }: any) {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.backButton, { backgroundColor: theme.colors.surface }]}>
-            <Ionicons name="arrow-back" size={20} color={theme.colors.text} />
+            <ArrowLeft size={20} color={theme.colors.text} />
           </TouchableOpacity>
           <View style={styles.headerText}><Text style={[styles.eyebrow, { color: theme.colors.textMuted }]}>Family overview</Text><Text style={[styles.title, { color: theme.colors.text }]}>Child dashboard</Text></View>
-          <TouchableOpacity onPress={() => loadDashboard(true)}><Ionicons name="refresh-outline" size={22} color={theme.colors.accent} /></TouchableOpacity>
+          <TouchableOpacity onPress={() => loadDashboard(true)}><RefreshCw size={22} color={theme.colors.accent} /></TouchableOpacity>
         </View>
 
         {error ? <View style={[styles.errorCard, { backgroundColor: theme.colors.dangerLight }]}><Text style={{ color: theme.colors.danger }}>{error}</Text></View> : null}
@@ -60,9 +60,9 @@ export default function ChildDashboardScreen({ navigation }: any) {
           </View>
 
           <View style={styles.summaryGrid}>
-            <Summary label="Location logs" value={dashboard.summary.locationCount} icon="navigate-outline" theme={theme} />
-            <Summary label="SOS alerts" value={dashboard.summary.sosCount} icon="alert-circle-outline" theme={theme} danger />
-            <Summary label="Active zones" value={dashboard.summary.activeGeofenceCount} icon="map-outline" theme={theme} />
+            <Summary label="Location logs" value={dashboard.summary.locationCount} icon="navigation" theme={theme} />
+            <Summary label="SOS alerts" value={dashboard.summary.sosCount} icon="alert" theme={theme} danger />
+            <Summary label="Active zones" value={dashboard.summary.activeGeofenceCount} icon="map" theme={theme} />
           </View>
 
           <SectionTitle title="Activity overview" theme={theme} />
@@ -106,7 +106,7 @@ export default function ChildDashboardScreen({ navigation }: any) {
   );
 }
 
-function Summary({ label, value, icon, theme, danger = false }: any) { return <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}><Ionicons name={icon} size={20} color={danger ? theme.colors.danger : theme.colors.accent} /><Text style={[styles.summaryValue, { color: theme.colors.text }]}>{value}</Text><Text style={[styles.muted, { color: theme.colors.textMuted }]}>{label}</Text></View>; }
+function Summary({ label, value, icon, theme, danger = false }: any) { const Icon = icon === 'alert' ? AlertCircle : icon === 'map' ? Map : Navigation; return <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}><Icon size={20} color={danger ? theme.colors.danger : theme.colors.accent} /><Text style={[styles.summaryValue, { color: theme.colors.text }]}>{value}</Text><Text style={[styles.muted, { color: theme.colors.textMuted }]}>{label}</Text></View>; }
 function SectionTitle({ title, theme }: any) { return <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{title}</Text>; }
 function Row({ label, value, theme, danger = false }: any) { return <View style={[styles.row, { borderBottomColor: theme.colors.border }]}><Text style={[styles.rowLabel, { color: theme.colors.textMuted }]}>{label}</Text><Text style={[styles.rowValue, { color: danger ? theme.colors.danger : theme.colors.text }]}>{value}</Text></View>; }
 function BatteryChart({ history, theme }: any) {

@@ -7,7 +7,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ScrollView,
   Dimensions,
   Animated,
@@ -15,6 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
+import { useAppAlert } from "../../context/AlertContext";
 import { colors, spacing, radius, fontSize } from "../../constants/theme";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthStackParamList } from "../../navigation/AuthNavigator";
@@ -184,6 +184,7 @@ function RoleCard({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function RegisterScreen({ navigation }: Props) {
   const { register } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -278,7 +279,7 @@ export default function RegisterScreen({ navigation }: Props) {
 const handleRegister = async () => {
   if (!name || !email || !password) {
     shakeBtn();
-    Alert.alert("Error", "Please fill all fields");
+    alert("Error", "Please fill all fields");
     return;
   }
   setLoading(true);
@@ -289,7 +290,7 @@ const handleRegister = async () => {
     // agar child hai to kuch nahi karna — app khud home pe le jayega
   } catch (error: any) {
     shakeBtn();
-    Alert.alert(
+    alert(
       "Registration Failed",
       error.response?.data?.message || "Something went wrong"
     );

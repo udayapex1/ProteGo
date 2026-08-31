@@ -4,13 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   Clipboard,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import apiClient from '../../api/client';
 
@@ -20,6 +20,7 @@ interface PairingCode {
 }
 
 export default function PairingScreen({ navigation }: any) {
+  const { alert } = useAppAlert();
   const { user } = useAuth();
   const [pairingCode, setPairingCode] = useState<PairingCode | null>(null);
   const [timeLeft, setTimeLeft] = useState('');
@@ -58,7 +59,7 @@ export default function PairingScreen({ navigation }: any) {
       const { data } = await apiClient.post('/pair/generate');
       setPairingCode(data);
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to generate code');
+      alert('Error', error.response?.data?.message || 'Failed to generate code');
     } finally {
       setLoading(false);
     }

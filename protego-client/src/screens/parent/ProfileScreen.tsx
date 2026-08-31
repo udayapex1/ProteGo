@@ -5,22 +5,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions,
-  Alert,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronRight, Fingerprint, Link, LogOut, Pencil, ShieldCheck, ShieldHalf, Trash2, Bell, UserRoundPen } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { userApi } from '../../api/user.api';
 import { biometricService } from '../../services/biometric.service';
 
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-
 export default function ProfileScreen({ navigation }: any) {
   const { user, logout } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [twoFactorEnabled,     setTwoFactorEnabled]     = useState(true);
   const [biometricEnabled,     setBiometricEnabled]     = useState(false);
@@ -28,7 +25,7 @@ export default function ProfileScreen({ navigation }: any) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleLogout = () => {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
+    alert('Log out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log out', style: 'destructive', onPress: logout },
     ]);
@@ -50,7 +47,7 @@ export default function ProfileScreen({ navigation }: any) {
       }
 
       if (!(await biometricService.isAvailable())) {
-        Alert.alert('Biometrics unavailable', 'Set up fingerprint or Face ID on this device before enabling biometric login.');
+        alert('Biometrics unavailable', 'Set up fingerprint or Face ID on this device before enabling biometric login.');
         return;
       }
 
@@ -59,21 +56,21 @@ export default function ProfileScreen({ navigation }: any) {
         setBiometricEnabled(true);
       }
     } catch {
-      Alert.alert('Biometric setup failed', 'Unable to update biometric login on this device.');
+      alert('Biometric setup failed', 'Unable to update biometric login on this device.');
     } finally {
       setBiometricBusy(false);
     }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert('Delete account', 'This permanently deletes your account and cannot be undone.', [
+    alert('Delete account', 'This permanently deletes your account and cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
         try {
           await userApi.deleteAccount();
           await logout();
         } catch (error: any) {
-          Alert.alert('Delete failed', error.response?.data?.message || 'Unable to delete your account.');
+          alert('Delete failed', error.response?.data?.message || 'Unable to delete your account.');
         }
       } },
     ]);
@@ -98,23 +95,15 @@ export default function ProfileScreen({ navigation }: any) {
     >
 
       {/* ── Header ── */}
-      <LinearGradient
-        colors={theme.colors.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.headerGrad}
-      >
+      <View style={[styles.headerGrad, { backgroundColor: theme.colors.background }] }>
         {/* Top row */}
         <View style={styles.topRow}>
           <View>
             <Text style={[styles.eyebrow, { color: theme.colors.textSubtle }]}>Account</Text>
             <Text style={[styles.topTitle, { color: theme.colors.text }]}>Profile</Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <ThemeToggle />
-            <TouchableOpacity style={styles.iconBtn}>
-              <Ionicons name="settings-outline" size={16} color={theme.colors.text} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -126,7 +115,7 @@ export default function ProfileScreen({ navigation }: any) {
             </View>
             {/* Edit badge */}
             <View style={[styles.editBadge, { backgroundColor: theme.colors.primary }]}>
-              <Ionicons name="pencil" size={9} color="#fff" />
+              <Pencil size={9} color="#fff" />
             </View>
           </View>
 
@@ -136,13 +125,13 @@ export default function ProfileScreen({ navigation }: any) {
           </Text>
 
           <View style={styles.roleChip}>
-            <Ionicons name="shield-checkmark" size={11} color="#C084FC" />
+            <ShieldCheck size={11} color="#C084FC" />
             <Text style={styles.roleChipText}>
               {user?.role === 'parent' ? 'Parent' : 'Child'}
             </Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       {/* ── Card ── */}
       <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
@@ -168,7 +157,7 @@ export default function ProfileScreen({ navigation }: any) {
 
         <View style={rowCardStyle}>
           <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
-            <Ionicons name="shield-half-outline" size={17} color={theme.colors.primary} />
+            <ShieldHalf size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Two-factor authentication</Text>
@@ -185,11 +174,11 @@ export default function ProfileScreen({ navigation }: any) {
 
         <View style={rowCardStyle}>
           <View style={[styles.rowIcon, { backgroundColor: theme.colors.primaryLight }]}>
-            <Ionicons name="finger-print-outline" size={17} color={theme.colors.primary} />
+            <Fingerprint size={17} color={theme.colors.primary} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Biometric login</Text>
-            <Text style={rowSubStyle}>Use fingerprint to sign in</Text>
+            <Text style={rowSubStyle}>Use fingerprint or Face ID to unlock</Text>
           </View>
           <TouchableOpacity
             style={[styles.toggle, biometricEnabled ? { backgroundColor: theme.colors.primary, alignItems: 'flex-end' } : { backgroundColor: theme.colors.input, alignItems: 'flex-start' }]}
@@ -209,7 +198,7 @@ export default function ProfileScreen({ navigation }: any) {
           onPress={() => navigation.navigate('PairedAccount')}
          >
           <View style={[styles.rowIcon, { backgroundColor: theme.colors.successLight }]}>
-            <Ionicons name="link-outline" size={17} color={theme.colors.success} />
+            <Link size={17} color={theme.colors.success} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Paired account</Text>
@@ -217,7 +206,7 @@ export default function ProfileScreen({ navigation }: any) {
               {user?.pairedWith ? '● Connected' : 'Not paired yet'}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={theme.colors.textSubtle} />
+          <ChevronRight size={16} color={theme.colors.textSubtle} />
         </TouchableOpacity>
 
         {/* ── Notifications ── */}
@@ -225,7 +214,7 @@ export default function ProfileScreen({ navigation }: any) {
 
         <View style={rowCardStyle}>
           <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
-            <Ionicons name="notifications-outline" size={17} color={theme.colors.danger} />
+            <Bell size={17} color={theme.colors.danger} />
           </View>
           <View style={styles.rowText}>
             <Text style={rowTitleStyle}>Push notifications</Text>
@@ -243,7 +232,7 @@ export default function ProfileScreen({ navigation }: any) {
         {/* ── Account ── */}
         <Text style={sectionTitleStyle}>Account</Text>
 
-        {/* Edit + Logout side by side */}
+        {/* Account actions */}
         <View style={styles.accountRow}>
           <TouchableOpacity
             style={[
@@ -251,10 +240,11 @@ export default function ProfileScreen({ navigation }: any) {
               styles.editBtn,
               { backgroundColor: theme.colors.row, borderColor: theme.colors.border },
             ]}
+            onPress={() => alert('Edit profile', 'Profile editing will be available soon.')}
             activeOpacity={0.7}
           >
             <View style={[styles.rowIcon, { backgroundColor: theme.colors.input }]}>
-              <Ionicons name="create-outline" size={17} color={theme.colors.text} />
+              <UserRoundPen size={17} color={theme.colors.text} />
             </View>
             <Text style={[styles.editBtnText, { color: theme.colors.text }]}>Edit profile</Text>
           </TouchableOpacity>
@@ -268,7 +258,7 @@ export default function ProfileScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
-              <Ionicons name="log-out-outline" size={17} color={theme.colors.danger} />
+              <LogOut size={17} color={theme.colors.danger} />
             </View>
             <Text style={[styles.logoutBtnText, { color: theme.colors.danger }]}>Log out</Text>
           </TouchableOpacity>
@@ -279,7 +269,7 @@ export default function ProfileScreen({ navigation }: any) {
             activeOpacity={0.7}
           >
             <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
-              <Ionicons name="trash-outline" size={17} color={theme.colors.danger} />
+              <Trash2 size={17} color={theme.colors.danger} />
             </View>
             <Text style={[styles.logoutBtnText, { color: theme.colors.danger }]}>Delete</Text>
           </TouchableOpacity>
@@ -299,13 +289,13 @@ const styles = StyleSheet.create({
   /* ── Header ── */
   headerGrad: {
     paddingHorizontal: 24,
-    paddingBottom: 80,
+    paddingBottom: 56,
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 56,
+    marginTop: 24,
     marginBottom: 24,
   },
   eyebrow: {
@@ -322,15 +312,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: -0.4,
   },
-  iconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
   /* Avatar */
   avatarWrap: {
     alignItems: 'center',
@@ -400,7 +381,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    marginTop: -28,
+    marginTop: -20,
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 36,
@@ -491,7 +472,7 @@ const styles = StyleSheet.create({
 
   /* Account row — side by side */
   accountRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 10,
   },
   accountBtn: {
@@ -502,6 +483,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
     borderWidth: 0.5,
+    minHeight: 58,
   },
   editBtn: {
     backgroundColor: '#fff',

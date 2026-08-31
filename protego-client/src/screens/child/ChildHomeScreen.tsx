@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Modal,
   Linking
@@ -15,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { useAuth } from '../../context/AuthContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
@@ -32,6 +32,7 @@ const SOS_THUMB_SIZE = 50;
 
 export default function ChildHomeScreen() {
   const { user } = useAuth();
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const [myLocation, setMyLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [zones, setZones] = useState<Geofence[]>([]);
@@ -110,7 +111,7 @@ export default function ChildHomeScreen() {
 
   const handleSOS = async () => {
     if (!myLocation) {
-      Alert.alert('Error', 'Location not available yet. Please wait a moment.');
+      alert('Error', 'Location not available yet. Please wait a moment.');
       return;
     }
 
@@ -141,10 +142,10 @@ export default function ChildHomeScreen() {
         timestamp: new Date().toISOString(),
       });
       console.log('✅ SOS accepted by server:', { id: result?._id, battery: result?.battery });
-      Alert.alert('SOS Sent', 'Your parent has been notified of your emergency.');
+      alert('SOS Sent', 'Your parent has been notified of your emergency.');
     } catch (error) {
       console.error('❌ SOS request failed:', error);
-      Alert.alert('Error', 'Failed to send SOS. Please try again.');
+      alert('Error', 'Failed to send SOS. Please try again.');
     } finally {
       setSosTriggering(false);
     }
@@ -425,7 +426,7 @@ export default function ChildHomeScreen() {
         <TouchableOpacity
           style={[styles.sosBtn, sosTriggering && { opacity: 0.7 }]}
           onPress={() =>
-            Alert.alert('Confirm SOS', 'This will alert your parent immediately. Continue?', [
+            alert('Confirm SOS', 'This will alert your parent immediately. Continue?', [
               { text: 'Cancel', style: 'cancel' },
               { text: 'Send SOS', style: 'destructive', onPress: handleSOS },
             ])

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAppAlert } from '../../context/AlertContext';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAppTheme } from '../../context/ThemeContext';
 import { authApi } from '../../api/auth.api';
@@ -9,17 +10,18 @@ type Props = { navigation: StackNavigationProp<AuthStackParamList, 'ForgotPasswo
 
 export default function ForgotPasswordScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
+  const { alert } = useAppAlert();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (!email.trim()) return Alert.alert('Email required', 'Enter the email linked to your account.');
+    if (!email.trim()) return alert('Email required', 'Enter the email linked to your account.');
     setLoading(true);
     try {
       const result = await authApi.forgotPassword(email.trim());
-      Alert.alert('Check your email', result.message, [{ text: 'Back to login', onPress: () => navigation.navigate('Login') }]);
+      alert('Check your email', result.message, [{ text: 'Back to login', onPress: () => navigation.navigate('Login') }]);
     } catch (error: any) {
-      Alert.alert('Request failed', error.response?.data?.message || 'Unable to send the reset email.');
+      alert('Request failed', error.response?.data?.message || 'Unable to send the reset email.');
     } finally {
       setLoading(false);
     }

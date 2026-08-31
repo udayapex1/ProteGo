@@ -6,16 +6,17 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../context/ThemeContext';
+import { useAppAlert } from '../../context/AlertContext';
 import { useAuth } from '../../context/AuthContext';
 import { pairingApi } from '../../api/pairing.api';
 import ThemeToggle from '../../components/ThemeToggle';
 
 export default function PairedAccountScreen({ navigation }: any) {
+  const { alert } = useAppAlert();
   const { theme } = useAppTheme();
   const { user, setPairedWith } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -32,7 +33,7 @@ export default function PairedAccountScreen({ navigation }: any) {
       const data = await pairingApi.getPairedUser();
       setPairedUser(data);
     } catch (error: any) {
-      Alert.alert('Error', error?.response?.data?.message || 'Failed to load paired account');
+      alert('Error', error?.response?.data?.message || 'Failed to load paired account');
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -45,7 +46,7 @@ export default function PairedAccountScreen({ navigation }: any) {
   };
 
   const handleUnpair = () => {
-    Alert.alert(
+    alert(
       'Unpair account',
       `This will disconnect you from ${pairedUser?.name}. Location sharing and alerts will stop.`,
       [
@@ -60,7 +61,7 @@ export default function PairedAccountScreen({ navigation }: any) {
               await setPairedWith(null);
               navigation.goBack();
             } catch (error: any) {
-              Alert.alert('Error', error?.response?.data?.message || 'Failed to unpair');
+              alert('Error', error?.response?.data?.message || 'Failed to unpair');
             } finally {
               setUnpairing(false);
             }

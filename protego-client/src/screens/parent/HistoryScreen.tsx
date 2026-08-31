@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Ionicons } from '@expo/vector-icons';
+import { CalendarDays, Clock3, Expand, Flag, Map, Play, X, MapPin } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -171,7 +171,7 @@ export default function HistoryScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <ThemeToggle />
           <TouchableOpacity style={[styles.dateBtn, { backgroundColor: theme.colors.primaryLight }]} onPress={() => setShowPicker(true)}>
-            <Ionicons name="calendar-outline" size={14} color={theme.colors.primary} />
+            <CalendarDays size={14} color={theme.colors.primary} />
             <Text style={[styles.dateBtnText, { color: theme.colors.primary }]}>{formatDateLabel(selectedDate)}</Text>
           </TouchableOpacity>
         </View>
@@ -237,11 +237,7 @@ export default function HistoryScreen() {
                       isLast && styles.pinEnd,
                     ]}
                   >
-                    <Ionicons
-                      name={isFirst ? 'play' : isLast ? 'flag' : 'time-outline'}
-                      size={12}
-                      color="#fff"
-                    />
+                    {isFirst ? <Play size={12} color="#fff" /> : isLast ? <Flag size={12} color="#fff" /> : <Clock3 size={12} color="#fff" />}
                   </View>
                   <View style={styles.timeLabel}>
                     <Text style={styles.timeLabelText}>{formatTime(point.timestamp)}</Text>
@@ -252,7 +248,7 @@ export default function HistoryScreen() {
           </MapView>
         ) : (
           <View style={styles.mapPlaceholder}>
-            <Ionicons name="map-outline" size={26} color="#999" />
+            <Map size={26} color="#999" />
             <Text style={[styles.mapPlaceholderText, { color: theme.colors.textMuted }]}>
               {loading ? 'Loading history...' : 'No location data for this day'}
             </Text>
@@ -264,7 +260,7 @@ export default function HistoryScreen() {
             style={styles.fullscreenBtn}
             onPress={() => setIsMapFullscreen(true)}
           >
-            <Ionicons name="expand-outline" size={16} color="#fff" />
+            <Expand size={16} color="#fff" />
           </TouchableOpacity>
         )}
       </View>
@@ -310,7 +306,7 @@ export default function HistoryScreen() {
                 return (
                   <Marker key={index} coordinate={point} onPress={() => setSelectedPointIndex(index)}>
                     <View style={[styles.pinMarker, isFirst && styles.pinStart, isLast && styles.pinEnd]}>
-                      <Ionicons name={isFirst ? 'play' : isLast ? 'flag' : 'time-outline'} size={12} color="#fff" />
+                      {isFirst ? <Play size={12} color="#fff" /> : isLast ? <Flag size={12} color="#fff" /> : <Clock3 size={12} color="#fff" />}
                     </View>
                     <View style={styles.timeLabel}>
                       <Text style={styles.timeLabelText}>{formatTime(point.timestamp)}</Text>
@@ -326,7 +322,7 @@ export default function HistoryScreen() {
               style={styles.closeFullscreenBtn}
               onPress={() => setIsMapFullscreen(false)}
             >
-              <Ionicons name="close" size={20} color="#fff" />
+                <X size={20} color="#fff" />
             </TouchableOpacity>
           </SafeAreaView>
         </View>
@@ -354,13 +350,7 @@ export default function HistoryScreen() {
             }}
           >
             <View style={styles.stopIcon}>
-              <Ionicons
-                name={
-                  index === 0 ? 'play' : index === points.length - 1 ? 'flag' : 'location'
-                }
-                size={14}
-                color={colors.primary}
-              />
+              {index === 0 ? <Play size={14} color={colors.primary} /> : index === points.length - 1 ? <Flag size={14} color={colors.primary} /> : <MapPin size={14} color={colors.primary} />}
             </View>
             <Text style={[styles.stopTime, { color: theme.colors.text }]}>
               {formatTime(point.timestamp)}
