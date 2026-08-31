@@ -275,9 +275,6 @@ export default function ParentHomeScreen({ navigation }: any) {
             <Text style={[styles.greeting, { color: theme.colors.text }]}>Hello, {user?.name?.split(' ')[0]}</Text>
           </View>
           <ThemeToggle />
-          <TouchableOpacity style={styles.dashboardButton} onPress={() => navigation.navigate('ChildDashboard')}>
-            <Ionicons name="analytics-outline" size={18} color="#fff" />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.mapCard}>
@@ -576,14 +573,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
     paddingBottom: spacing.sm,
-  },
-  dashboardButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   greetingSub: {
     color: '#999',

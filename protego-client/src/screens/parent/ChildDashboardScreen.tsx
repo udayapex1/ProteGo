@@ -65,6 +65,17 @@ export default function ChildDashboardScreen({ navigation }: any) {
             <Summary label="Active zones" value={dashboard.summary.activeGeofenceCount} icon="map-outline" theme={theme} />
           </View>
 
+          <SectionTitle title="Activity overview" theme={theme} />
+          <View style={[styles.chartCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <Text style={[styles.chartTitle, { color: theme.colors.text }]}>Battery trend</Text>
+            <Text style={[styles.muted, { color: theme.colors.textMuted }]}>Recent reported battery levels</Text>
+            <BatteryChart history={dashboard.locationHistory} theme={theme} />
+          </View>
+          <View style={[styles.chartCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={styles.chartHeader}><View><Text style={[styles.chartTitle, { color: theme.colors.text }]}>Location activity</Text><Text style={[styles.muted, { color: theme.colors.textMuted }]}>Updates over the last 7 days</Text></View><Text style={[styles.chartTotal, { color: theme.colors.accent }]}>{dashboard.summary.locationCount}</Text></View>
+            <ActivityChart history={dashboard.locationHistory} theme={theme} />
+          </View>
+
           <SectionTitle title="Latest location" theme={theme} />
           <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
             {latestLocation ? <>
@@ -98,9 +109,20 @@ export default function ChildDashboardScreen({ navigation }: any) {
 function Summary({ label, value, icon, theme, danger = false }: any) { return <View style={[styles.summaryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}><Ionicons name={icon} size={20} color={danger ? theme.colors.danger : theme.colors.accent} /><Text style={[styles.summaryValue, { color: theme.colors.text }]}>{value}</Text><Text style={[styles.muted, { color: theme.colors.textMuted }]}>{label}</Text></View>; }
 function SectionTitle({ title, theme }: any) { return <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{title}</Text>; }
 function Row({ label, value, theme, danger = false }: any) { return <View style={[styles.row, { borderBottomColor: theme.colors.border }]}><Text style={[styles.rowLabel, { color: theme.colors.textMuted }]}>{label}</Text><Text style={[styles.rowValue, { color: danger ? theme.colors.danger : theme.colors.text }]}>{value}</Text></View>; }
+function BatteryChart({ history, theme }: any) {
+  const points = history.length > 12 ? history.filter((_: any, index: number) => index % Math.ceil(history.length / 12) === 0).slice(-12) : history;
+  return <View style={styles.chartArea}>{points.length ? points.map((point: any, index: number) => <View key={`${point.createdAt}-${index}`} style={styles.barColumn}><View style={[styles.batteryBar, { height: `${Math.max(5, point.battery)}%`, backgroundColor: point.battery <= 20 ? theme.colors.danger : point.battery <= 50 ? '#F59E0B' : theme.colors.success }]} /><Text style={[styles.chartAxis, { color: theme.colors.textMuted }]}>{index === 0 || index === points.length - 1 ? `${point.battery}%` : ''}</Text></View>) : <Text style={[styles.muted, { color: theme.colors.textMuted }]}>No battery data available.</Text>}</View>;
+}
+function ActivityChart({ history, theme }: any) {
+  const today = new Date();
+  const days = Array.from({ length: 7 }, (_, offset) => { const date = new Date(today); date.setHours(0, 0, 0, 0); date.setDate(today.getDate() - (6 - offset)); return date; });
+  const counts = days.map(day => history.filter((entry: any) => new Date(entry.createdAt).toDateString() === day.toDateString()).length);
+  const max = Math.max(...counts, 1);
+  return <View style={styles.chartArea}>{counts.map((count, index) => <View key={days[index].toISOString()} style={styles.barColumn}><View style={[styles.activityBar, { height: `${Math.max(count ? 8 : 2, (count / max) * 100)}%`, backgroundColor: theme.colors.accent }]} /><Text style={[styles.chartAxis, { color: theme.colors.textMuted }]}>{days[index].toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 2)}</Text></View>)}</View>;
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1 }, content: { padding: 20, paddingBottom: 40 }, center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 }, backButton: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' }, headerText: { flex: 1 }, eyebrow: { fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }, title: { fontSize: 24, fontWeight: '700', marginTop: 3 },
-  errorCard: { padding: 14, borderRadius: 12, marginBottom: 16 }, profileCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderRadius: 18, borderWidth: 1 }, avatar: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center' }, avatarText: { color: '#fff', fontSize: 20, fontWeight: '700' }, childName: { fontSize: 19, fontWeight: '700' }, muted: { fontSize: 12, marginTop: 4 }, connected: { fontSize: 12, marginTop: 7, fontWeight: '600' }, summaryGrid: { flexDirection: 'row', gap: 8, marginTop: 12 }, summaryCard: { flex: 1, minHeight: 100, padding: 12, borderRadius: 14, borderWidth: 1 }, summaryValue: { fontSize: 23, fontWeight: '700', marginTop: 8 }, sectionTitle: { fontSize: 17, fontWeight: '700', marginTop: 24, marginBottom: 10 }, card: { borderRadius: 16, borderWidth: 1, paddingHorizontal: 16 }, row: { paddingVertical: 13, borderBottomWidth: 1, gap: 5 }, rowLabel: { fontSize: 12 }, rowValue: { fontSize: 14, fontWeight: '600' },
+  errorCard: { padding: 14, borderRadius: 12, marginBottom: 16 }, profileCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, borderRadius: 18, borderWidth: 1 }, avatar: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center' }, avatarText: { color: '#fff', fontSize: 20, fontWeight: '700' }, childName: { fontSize: 19, fontWeight: '700' }, muted: { fontSize: 12, marginTop: 4 }, connected: { fontSize: 12, marginTop: 7, fontWeight: '600' }, summaryGrid: { flexDirection: 'row', gap: 8, marginTop: 12 }, summaryCard: { flex: 1, minHeight: 100, padding: 12, borderRadius: 14, borderWidth: 1 }, summaryValue: { fontSize: 23, fontWeight: '700', marginTop: 8 }, chartCard: { borderRadius: 16, borderWidth: 1, padding: 16, marginBottom: 10 }, chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }, chartTitle: { fontSize: 15, fontWeight: '700' }, chartTotal: { fontSize: 22, fontWeight: '700' }, chartArea: { height: 135, flexDirection: 'row', alignItems: 'flex-end', gap: 5, paddingTop: 18, marginTop: 10 }, barColumn: { flex: 1, height: '100%', alignItems: 'center', justifyContent: 'flex-end', gap: 5 }, batteryBar: { width: '70%', minHeight: 4, borderRadius: 5 }, activityBar: { width: '60%', minHeight: 3, borderRadius: 5 }, chartAxis: { fontSize: 9 }, sectionTitle: { fontSize: 17, fontWeight: '700', marginTop: 24, marginBottom: 10 }, card: { borderRadius: 16, borderWidth: 1, paddingHorizontal: 16 }, row: { paddingVertical: 13, borderBottomWidth: 1, gap: 5 }, rowLabel: { fontSize: 12 }, rowValue: { fontSize: 14, fontWeight: '600' },
 });
