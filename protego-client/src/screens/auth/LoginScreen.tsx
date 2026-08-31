@@ -168,7 +168,7 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
 
           {/* Forgot */}
-          <TouchableOpacity onPress={() => { }} style={styles.forgotWrapper}>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgotWrapper}>
             <Text style={[styles.forgotText, { color: theme.colors.accent }]}>Forgot password?</Text>
           </TouchableOpacity>
 

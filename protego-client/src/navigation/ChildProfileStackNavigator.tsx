@@ -7,6 +7,7 @@ import BatteryOptimizationScreen from '../screens/child/BatteryOptimizationScree
 export type ProfileStackParamList = {
   ProfileMain: undefined;
   PairedAccount: undefined;
+  BatteryOptimization: undefined;
 };
 
 const Stack = createStackNavigator<ProfileStackParamList>();

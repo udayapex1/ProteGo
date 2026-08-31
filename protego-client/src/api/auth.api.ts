@@ -93,4 +93,14 @@ export const authApi = {
     const { data } = await apiClient.post('/auth/2fa/disable');
     return data;
   },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const { data } = await apiClient.post('/auth/forgot-password', { email });
+    return data;
+  },
+
+  resetPassword: async (token: string, password: string): Promise<{ message: string }> => {
+    const { data } = await apiClient.post(`/auth/reset-password/${encodeURIComponent(token)}`, { password });
+    return data;
+  },
 };

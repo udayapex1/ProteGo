@@ -15,8 +15,7 @@ import MapView, { Marker, Circle, Polyline } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
-import { locationApi } from '../../api/location.api';
-import { geofenceApi } from '../../api/geofence.api';
+import { childApi } from '../../api/child.api';
 import { Geofence } from '../../types/location.types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -38,11 +37,12 @@ const formatDistance = (meters: number): string => {
   return `${(meters / 1000).toFixed(1)} km`;
 };
 
-export default function ParentHomeScreen() {
+export default function ParentHomeScreen({ navigation }: any) {
   const { user } = useAuth();
   const { theme } = useAppTheme();
   const [liveLocation, setLiveLocation] = useState<LiveLocation | null>(null);
   const [zones, setZones] = useState<Geofence[]>([]);
+  const [childLogSummary, setChildLogSummary] = useState({ locationCount: 0, sosCount: 0 });
   const [loading, setLoading] = useState(true);
   const [parentLocation, setParentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [route, setRoute] = useState<{
@@ -186,26 +186,33 @@ export default function ParentHomeScreen() {
   const loadInitialData = async () => {
     try {
       if (user?.pairedWith) {
-        const latest = await locationApi.getLatest(user.pairedWith);
+        const dashboard = await childApi.getDashboard();
+        const latest = dashboard.latestLocation;
+        setChildLogSummary({
+          locationCount: dashboard.summary.locationCount,
+          sosCount: dashboard.summary.sosCount,
+        });
 
         // Sirf set karo agar Socket se abhi tak kuch nahi aaya
         if (latest && !hasReceivedSocketUpdate.current) {
           console.log('📥 Parent loaded latest child telemetry:', {
             battery: latest.battery,
             network: latest.network,
-            timestamp: latest.createdAt ?? latest.timestamp,
+            timestamp: 'createdAt' in latest ? latest.createdAt : latest.timestamp,
           });
+          const latestLatitude = 'location' in latest ? latest.location.coordinates[1] : latest.latitude;
+          const latestLongitude = 'location' in latest ? latest.location.coordinates[0] : latest.longitude;
+          const latestTimestamp = 'createdAt' in latest ? latest.createdAt : latest.timestamp;
           setLiveLocation({
-            latitude: latest.location?.coordinates?.[1] ?? latest.latitude,
-            longitude: latest.location?.coordinates?.[0] ?? latest.longitude,
+            latitude: latestLatitude,
+            longitude: latestLongitude,
             battery: latest.battery,
             network: latest.network,
-            timestamp: latest.createdAt ?? latest.timestamp,
+            timestamp: latestTimestamp,
           });
         }
 
-        const fetchedZones = await geofenceApi.getParentZones();
-        setZones(fetchedZones);
+        setZones(dashboard.geofences);
       }
     } catch (error) {
       console.log('❌ Failed to load home data:', error);
@@ -268,6 +275,9 @@ export default function ParentHomeScreen() {
             <Text style={[styles.greeting, { color: theme.colors.text }]}>Hello, {user?.name?.split(' ')[0]}</Text>
           </View>
           <ThemeToggle />
+          <TouchableOpacity style={styles.dashboardButton} onPress={() => navigation.navigate('ChildDashboard')}>
+            <Ionicons name="analytics-outline" size={18} color="#fff" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.mapCard}>
@@ -511,7 +521,7 @@ export default function ParentHomeScreen() {
                   : '--'}
             </Text>
             <Text style={[styles.statSub, { color: theme.colors.textSubtle }]}>
-              {route ? `ETA ${route.durationText}` : 'Straight line'}
+              {route ? `ETA ${route.durationText}` : `${childLogSummary.locationCount} logs · ${childLogSummary.sosCount} SOS`}
             </Text>
           </View>
         </View>
@@ -566,6 +576,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
     paddingBottom: spacing.sm,
+  },
+  dashboardButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   greetingSub: {
     color: '#999',

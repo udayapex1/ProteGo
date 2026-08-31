@@ -14,6 +14,7 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, radius, fontSize } from '../../constants/theme';
 import { useAppTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ThemeToggle';
+import { userApi } from '../../api/user.api';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -29,6 +30,20 @@ export default function ChildProfileScreen({ navigation }: any) {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log out', style: 'destructive', onPress: logout },
+    ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert('Delete account', 'This permanently deletes your account and cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          await userApi.deleteAccount();
+          await logout();
+        } catch (error: any) {
+          Alert.alert('Delete failed', error.response?.data?.message || 'Unable to delete your account.');
+        }
+      } },
     ]);
   };
 
@@ -185,6 +200,15 @@ export default function ChildProfileScreen({ navigation }: any) {
           </View>
           <View style={styles.rowText}>
             <Text style={[styles.rowTitle, { color: theme.colors.danger }]}>Log out</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[rowCardStyle, { backgroundColor: theme.colors.dangerLight, borderColor: theme.colors.dangerLight }]} onPress={handleDeleteAccount}>
+          <View style={[styles.rowIcon, { backgroundColor: theme.colors.dangerLight }]}>
+            <Ionicons name="trash-outline" size={17} color={theme.colors.danger} />
+          </View>
+          <View style={styles.rowText}>
+            <Text style={[styles.rowTitle, { color: theme.colors.danger }]}>Delete account</Text>
           </View>
         </TouchableOpacity>
       </View>

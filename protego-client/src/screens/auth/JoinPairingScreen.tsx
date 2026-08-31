@@ -110,7 +110,7 @@ export default function JoinPairingScreen() {
           {digits.map((digit, i) => (
             <TextInput
               key={i}
-              ref={(ref) => (inputsRef.current[i] = ref)}
+              ref={(ref) => { inputsRef.current[i] = ref; }}
               style={[
                 styles.codeBox,
                 {

@@ -1,5 +1,5 @@
 
-const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL || 'http://10.207.80.50:8000';
+const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL || 'http://10.43.197.50:8000';
 
 const trimTrailingSlashes = (url: string) => url.replace(/\/+$/, '');
 

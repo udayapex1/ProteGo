@@ -27,7 +27,7 @@ interface AuthContextType {
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   completeTwoFactor: (userId: string, token: string) => Promise<void>;
-  setPairedWith: (pairedWithId: string) => Promise<void>;
+  setPairedWith: (pairedWithId: string | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const setPairedWith = async (pairedWithId: string) => {
+  const setPairedWith = async (pairedWithId: string | null) => {
     if (!user) return;
     const updatedUser = { ...user, pairedWith: pairedWithId };
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));

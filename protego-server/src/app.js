@@ -8,6 +8,7 @@ import pairingRoutes from './routes/pairing.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import userRoutes from './routes/user.routes.js';
 import geofenceRoutes from './routes/geofence.routes.js';
+import childRoutes from './routes/child.routes.js';
 const app = express();
 
 app.use(helmet());
@@ -22,6 +23,7 @@ app.use('/api/pair', pairingRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/geofence', geofenceRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/child', childRoutes);
 
 
 app.get('/', (req, res) => {

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useAppTheme } from '../context/ThemeContext';
 
-import ParentHomeScreen from '../screens/parent/ParentHomeScreen';
+import ParentDashboardStackNavigator from './ParentDashboardStackNavigator';
 import ZonesStackNavigator from './ZonesStackNavigator';
 import HistoryScreen from '../screens/parent/HistoryScreen';
 import ParentProfileStackNavigator from './ParentProfileStackNavigator';
@@ -62,7 +62,7 @@ export default function TabNavigator() {
   if (user?.role === 'parent') {
     return (
       <Tab.Navigator screenOptions={screenOptions}>
-        <Tab.Screen name="Home" component={ParentHomeScreen} />
+        <Tab.Screen name="Home" component={ParentDashboardStackNavigator} />
         <Tab.Screen name="Zones" component={ZonesStackNavigator} />
         <Tab.Screen name="History" component={HistoryScreen} />
         <Tab.Screen name="Profile" component={ParentProfileStackNavigator} />
