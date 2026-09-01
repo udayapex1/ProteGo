@@ -38,7 +38,7 @@ Protego helps parents stay connected with their children and elderly family memb
 - **Redis** — Live location caching (cache-aside pattern) for fast reads
 - **JWT** — Access + refresh token authentication
 - **Speakeasy + QRCode** — TOTP-based two-factor authentication
-- **Nodemailer** — Email alerts for SOS and geofence breaches (MVP transport layer)
+- **Nodemailer** — Email alerts for SOS and geofence breaches
 
 **Architecture pattern:** Controller → Service → Repository, designed for scalability and easy migration (e.g. REST → GraphQL, Nodemailer → Resend) as the product grows.
 
@@ -94,7 +94,6 @@ Each paired parent-child forms a private Socket.IO room (`[parentId, childId].so
 - [ ] Smartwatch (WearOS) companion app
 - [ ] Elderly mode — simplified UI, auto check-ins
 - [ ] REST → GraphQL migration for location-heavy endpoints
-- [ ] Nodemailer → Resend migration
 
 ---
 
@@ -137,3 +136,4 @@ This project is currently private and under active development.
 ---
 
 Built by **Uday Pareta** 🚀
+- [ ] Nodemailer → Resend migration

@@ -16,13 +16,13 @@ const sendMail = async ({ to, subject, html }) => {
   });
 
   const result = await transporter.sendMail({
-    from: `"Protego" <${process.env.EMAIL_USER}>`,
+    from: `\"Protego\" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html
   });
 
-  console.log('✅ Email accepted by transport:', { to, messageId: result.messageId, response: result.response });
+  console.log('✅ Email accepted by Gmail transport:', { to, messageId: result.messageId, response: result.response });
   return result;
 };
 

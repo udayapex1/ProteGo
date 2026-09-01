@@ -462,7 +462,6 @@ Called directly from React Native (no backend proxy)
 
 ### Polish
 - [ ] Custom Alert component (replace native Alert.alert())
-- [ ] Dedicated app email (protego.alerts@gmail.com or Resend)
 - [ ] mapStyles extracted to constants file
 - [ ] ORS key to env var
 
@@ -545,3 +544,4 @@ Category: Family / Safety
 Privacy Policy URL: (needs hosting — HTML built, use GitHub Pages)
 Target audience: Indian families, parents with children/elderly parents
 ```
+- [ ] Dedicated app email (protego.alerts@gmail.com or Resend)
