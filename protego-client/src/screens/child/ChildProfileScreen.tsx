@@ -185,7 +185,7 @@ export default function ChildProfileScreen({ navigation }: any) {
         </View>
 
         <Text style={sectionTitleStyle}>Account</Text>
-        <TouchableOpacity style={rowCardStyle}>
+        <TouchableOpacity style={rowCardStyle} onPress={() => navigation.navigate('EditProfile')}>
           <View style={[styles.rowIcon, { backgroundColor: theme.colors.input }]}>
             <Ionicons name="create-outline" size={17} color={theme.colors.textMuted} />
           </View>

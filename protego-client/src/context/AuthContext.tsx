@@ -28,6 +28,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   completeTwoFactor: (userId: string, token: string) => Promise<void>;
   setPairedWith: (pairedWithId: string | null) => Promise<void>;
+  updateUserProfile: (profile: Pick<AuthUser, "name" | "email">) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,6 +105,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
+
+  const updateUserProfile = async (profile: Pick<AuthUser, "name" | "email">) => {
+    if (!user) return;
+    const updatedUser = { ...user, ...profile };
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
   const logout = async () => {
     try {
       await authApi.logout();
@@ -125,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         completeTwoFactor,
         setPairedWith,
+        updateUserProfile,
       }}
     >
       {children}

@@ -18,7 +18,8 @@ const userController = {
       return res.status(200).json(result);
     } catch (error) {
       console.error('❌ Error in updateProfile:', error.message);
-      return res.status(400).json({ message: error.message });
+      const status = error.message === 'User not found' ? 404 : error.message === 'Email is already in use' ? 409 : 400;
+      return res.status(status).json({ message: error.message });
     }
   },
 

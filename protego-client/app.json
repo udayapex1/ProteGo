@@ -41,7 +41,13 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.udaypareta.protegoclient"
+      "package": "com.udaypareta.protegoclient",
+
+       "config": {
+    "googleMaps": {
+      "apiKey": "AIzaSyB2rx2Na-YrviSZPjdZfsluq4-L1cWzzV0"
+    }
+     }
     },
     "web": {
       "favicon": "./assets/favicon.png"

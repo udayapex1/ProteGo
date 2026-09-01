@@ -17,15 +17,47 @@ const userService = {
   },
 
   updateProfile: async (userId, data) => {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new Error('Profile data must be an object');
+    }
+
     const allowed = {};
-    if (data.name) allowed.name = data.name;
+
+    if (Object.prototype.hasOwnProperty.call(data, 'name')) {
+      if (typeof data.name !== 'string') throw new Error('Name must be a string');
+      const name = data.name.trim();
+      if (name.length < 2 || name.length > 80) {
+        throw new Error('Name must be between 2 and 80 characters');
+      }
+      allowed.name = name;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'email')) {
+      if (typeof data.email !== 'string') throw new Error('Email must be a string');
+      const email = data.email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error('Please provide a valid email address');
+      }
+
+      const existingUser = await userRepository.findByEmailExceptId(email, userId);
+      if (existingUser) throw new Error('Email is already in use');
+      allowed.email = email;
+    }
+
+    if (Object.keys(allowed).length === 0) {
+      throw new Error('Provide a name or email to update');
+    }
 
     const updated = await userRepository.updateById(userId, allowed);
+    if (!updated) throw new Error('User not found');
+
     return {
       id: updated._id,
       name: updated.name,
       email: updated.email,
-      role: updated.role
+      role: updated.role,
+      pairedWith: updated.pairedWith,
+      isTwoFactorEnabled: updated.isTwoFactorEnabled
     };
   },
 

@@ -10,6 +10,13 @@ const userRepository = {
     return await User.findOne({ email: email.trim().toLowerCase() });
   },
 
+  findByEmailExceptId: async (email, userId) => {
+    return await User.findOne({
+      email: email.trim().toLowerCase(),
+      _id: { $ne: userId }
+    });
+  },
+
   findById: async (id) => {
     return await User.findById(id);
   },
@@ -22,7 +29,10 @@ const userRepository = {
   },
 
   updateById: async (id, data) => {
-    return await User.findByIdAndUpdate(id, data, { new: true });
+    return await User.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true
+    });
   },
   deleteById: async (id) => {
   return await User.findByIdAndDelete(id);
